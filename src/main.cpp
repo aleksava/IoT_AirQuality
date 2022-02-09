@@ -1,17 +1,22 @@
 #include "secrets.h"
 #include <WiFiClientSecure.h>
-#include <MQTTClient.h>
+#include <MQTT.h>
 #include <ArduinoJson.h>
 #include "WiFi.h"
+#include <HTTPClient.h>
+#include "time.h"
 
 
 void messageHandler(String &topic, String &payload);
+
+
 // The MQTT topics that this device should publish/subscribe
-#define AWS_IOT_PUBLISH_TOPIC   "esp32/pub"
-#define AWS_IOT_SUBSCRIBE_TOPIC "esp32/sub"
+#define AWS_IOT_PUBLISH_TOPIC   "root/devices/1/update"
+#define AWS_IOT_SUBSCRIBE_TOPIC "root/devices/1/update"
 
 WiFiClientSecure net = WiFiClientSecure();
 MQTTClient client = MQTTClient(256);
+
 
 void connectAWS()
 {
@@ -36,7 +41,7 @@ void connectAWS()
   // Create a message handler
   client.onMessage(messageHandler);
 
-  Serial.print("Connecting to AWS IOT");
+  Serial.println("Connecting to AWS IOT");
 
   while (!client.connect(THINGNAME)) {
     Serial.print(".");
@@ -54,32 +59,118 @@ void connectAWS()
   Serial.println("AWS IoT Connected!");
 }
 
-void publishMessage()
+
+
+
+/* Class containing data points and time */
+
+class Datapoint
 {
-  StaticJsonDocument<200> doc;
-  doc["time"] = millis();
-  doc["sensor_a0"] = "testing...";//analogRead(0);
-  char jsonBuffer[512];
+  public:
+    void setData(float data);
+    void setTime(unsigned long time);
+  private:
+    float _data;
+    unsigned long _myTime;
+};
+
+/* Make JSON message and send it */
+
+void publishMessage(float data[], unsigned long myTime[])
+{
+  StaticJsonDocument<1024> doc;
+  //JsonArray Jtime = doc.createNestedArray("time");
+  JsonArray Jdata = doc.createNestedArray("data");
+  //copyArray(data, Jdata);
+
+  /*******************************************
+   * 
+   * 
+   * Figure out how to send a list of datapoint class
+   * 
+   * 
+   * 
+   * *****************************************/
+
+  for (int i=0; i < 10; i++)
+  {
+    Datapoint dataPoint;
+    dataPoint.setData(data[i]);
+    dataPoint.setTime(myTime[i]);
+    Jdata.add(dataPoint);
+    // Jtime.add(myTime[i]);
+    // if (i == 0)
+    // {
+    //   Jdata.add(1);
+    // }
+    // else
+    // {
+    //   Jdata.add(data[i]);
+    // }
+  }
+  Serial.println("memory used: "); Serial.println(doc.memoryUsage());
+  char jsonBuffer[1024];
   serializeJson(doc, jsonBuffer); // print to client
+  serializeJsonPretty(doc, Serial);
 
   client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
 }
 
+
+/* Printing message */
+
 void messageHandler(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
-
-//  StaticJsonDocument<200> doc;
-//  deserializeJson(doc, payload);
-//  const char* message = doc["message"];
 }
 
-void setup() {
+
+
+int counter = 0;
+float data[10];
+unsigned long myTime[10];
+
+
+/* Get timestamp from server */
+
+// NTP server to request epoch time
+const char* ntpServer = "pool.ntp.org";
+
+unsigned long getTimeNow() 
+{
+  time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo))
+  {
+    Serial.println("Failed to obtain time");
+    return(0);
+  }
+  time(&now);
+  return now;
+}
+
+
+
+void setup() 
+{
   Serial.begin(115200);
+  configTime(0, 0, ntpServer);
   connectAWS();
 }
 
-void loop() {
-  publishMessage();
+void loop() 
+{
+  data[counter] = counter + 1.1;
+  myTime[counter] = getTimeNow();
+
+  if (counter >= 10)
+  {
+    publishMessage(data, myTime);
+    counter = 0;
+  }
+
+
   client.loop();
-  delay(5000);
+  delay(1000);
+  counter++;
 }
+
