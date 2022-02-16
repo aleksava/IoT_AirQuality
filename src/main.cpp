@@ -15,7 +15,7 @@ void messageHandler(String &topic, String &payload);
 #define AWS_IOT_SUBSCRIBE_TOPIC "root/devices/1/update"
 
 WiFiClientSecure net = WiFiClientSecure();
-MQTTClient client = MQTTClient(256);
+MQTTClient client = MQTTClient(1024);
 
 
 void connectAWS()
@@ -114,7 +114,7 @@ String datapointToString(datapoint data)
 void publishMessage(datapoint data[])
 {
   StaticJsonDocument<1024> doc;
-  //JsonArray Jtime = doc.createNestedArray("time");
+  JsonArray Jtime = doc.createNestedArray("time");
   JsonArray Jdata = doc.createNestedArray("data");
   //copyArray(data, Jdata);
 
@@ -129,16 +129,16 @@ void publishMessage(datapoint data[])
 
   for (int i=0; i < 10; i++)
   {
-    //Jtemp.add(data[i]._temp);
-    // Jdata.add(data[i]._temp);
-    Jdata.add(data[i]);
+    Jdata.add(data[i]._temp);
+    Jtime.add(data[i]._myTime);
+    //Jdata.add(data[i]);
   }
   Serial.println("memory used: "); Serial.println(doc.memoryUsage());
+  //char jsonBuffer[] = "{\"timestsamps\":[123,124,125], \"temperatures\": [12.9, 14.3, 140.2], \"humidity\": [39, 44, 55]}";
   char jsonBuffer[1024];
   serializeJson(doc, jsonBuffer); // print to client
   serializeJsonPretty(doc, Serial);
-  //client.publish(AWS_IOT_PUBLISH_TOPIC,jsonBuffer,1024,1, qos=0);
-  if(!client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer, 1024, 1, 0))
+  if(!client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer))
   {
     Serial.println("****Failed to SEND ******");
   }
