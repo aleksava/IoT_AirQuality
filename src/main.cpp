@@ -93,6 +93,16 @@ struct Converter<datapoint> {
 };
 }
 
+String datapointToString(datapoint data)
+{
+  String output;
+  output = String(data._myTime);
+  output += ",";
+  output += String(data._temp, 3);
+  return output;
+}
+
+
 // struct tm timeinfo = *gmtime(&time);
 
 // // set {"time":"2021-05-04T13:13:04Z"}
@@ -119,16 +129,16 @@ void publishMessage(datapoint data[])
 
   for (int i=0; i < 10; i++)
   {
+    //Jtemp.add(data[i]._temp);
+    // Jdata.add(data[i]._temp);
     Jdata.add(data[i]);
-    //Jtime.add(data[i]._myTime);
   }
   Serial.println("memory used: "); Serial.println(doc.memoryUsage());
   char jsonBuffer[1024];
   serializeJson(doc, jsonBuffer); // print to client
-  //serializeJsonPretty(doc, Serial);
-  //Serial.println(jsonBuffer);
-
-  if(!client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer))
+  serializeJsonPretty(doc, Serial);
+  //client.publish(AWS_IOT_PUBLISH_TOPIC,jsonBuffer,1024,1, qos=0);
+  if(!client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer, 1024, 1, 0))
   {
     Serial.println("****Failed to SEND ******");
   }
