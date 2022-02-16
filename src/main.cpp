@@ -64,19 +64,44 @@ void connectAWS()
 
 /* Class containing data points and time */
 
-class Datapoint
-{
-  public:
-    void setData(float data);
-    void setTime(unsigned long time);
-  private:
-    float _data;
-    unsigned long _myTime;
-};
+// class Datapoint
+// {
+//   public:
+//     void setData(float data);
+//     void setTime(unsigned long time);
+//   private:
+//     float _data;
+//     unsigned long _myTime;
+// };
 
 /* Make JSON message and send it */
 
-void publishMessage(float data[], unsigned long myTime[])
+struct datapoint
+{
+  float _temp;
+  unsigned long _myTime;
+};
+
+namespace ARDUINOJSON_NAMESPACE {
+template <>
+struct Converter<datapoint> {
+  static bool toJson(const datapoint& src, VariantRef dst) {
+    dst["temp"] = src._temp;
+    dst["time"] = src._myTime;
+    return true;
+  }
+};
+}
+
+// struct tm timeinfo = *gmtime(&time);
+
+// // set {"time":"2021-05-04T13:13:04Z"}
+// doc["time"] = timeinfo;
+
+// // parse {"time":"2021-05-04T13:13:04Z"}
+// timeinfo = doc["time"];
+
+void publishMessage(datapoint data[])
 {
   StaticJsonDocument<1024> doc;
   //JsonArray Jtime = doc.createNestedArray("time");
@@ -94,26 +119,19 @@ void publishMessage(float data[], unsigned long myTime[])
 
   for (int i=0; i < 10; i++)
   {
-    Datapoint dataPoint;
-    dataPoint.setData(data[i]);
-    dataPoint.setTime(myTime[i]);
-    Jdata.add(dataPoint);
-    // Jtime.add(myTime[i]);
-    // if (i == 0)
-    // {
-    //   Jdata.add(1);
-    // }
-    // else
-    // {
-    //   Jdata.add(data[i]);
-    // }
+    Jdata.add(data[i]);
+    //Jtime.add(data[i]._myTime);
   }
   Serial.println("memory used: "); Serial.println(doc.memoryUsage());
   char jsonBuffer[1024];
   serializeJson(doc, jsonBuffer); // print to client
-  serializeJsonPretty(doc, Serial);
+  //serializeJsonPretty(doc, Serial);
+  //Serial.println(jsonBuffer);
 
-  client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer);
+  if(!client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer))
+  {
+    Serial.println("****Failed to SEND ******");
+  }
 }
 
 
@@ -126,8 +144,9 @@ void messageHandler(String &topic, String &payload) {
 
 
 int counter = 0;
-float data[10];
-unsigned long myTime[10];
+datapoint data[10];
+// float data[10];
+// unsigned long myTime[10];
 
 
 /* Get timestamp from server */
@@ -159,12 +178,12 @@ void setup()
 
 void loop() 
 {
-  data[counter] = counter + 1.1;
-  myTime[counter] = getTimeNow();
+  data[counter]._temp = counter + 1.1;
+  data[counter]._myTime = getTimeNow();
 
   if (counter >= 10)
   {
-    publishMessage(data, myTime);
+    publishMessage(data);
     counter = 0;
   }
 
