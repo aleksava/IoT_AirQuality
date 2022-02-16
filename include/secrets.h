@@ -1,9 +1,8 @@
 #include <pgmspace.h>
 
+#ifndef SECRET
 #define SECRET
 #define THINGNAME "1"
-
-
 
 const char WIFI_SSID[] = "H0413 Guest";
 const char WIFI_PASSWORD[] = "alevan95";
@@ -87,3 +86,5 @@ Pf5Z1KqboazslZMoC2fJDMdugakerjNgwSyLaTKjYGc8tIvyyW2oPVpu1DcDIO7y
 ZVNEIfT1zlRMSwbEuyWbdTsFPO329EdPVP4ZJtMLUhGIYKfA9H1FuQ==
 -----END RSA PRIVATE KEY-----
 )KEY";
+
+#endif
