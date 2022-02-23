@@ -6,7 +6,7 @@ const Text = styled.Text<{
     align?: 'left' | 'center' | 'right';
     bold?: boolean;
 }>((props) => ({
-    color: props.color ? props.color : props.theme.colors.text,
+    color: props.color ? props.color : props.theme.colors.text.main,
     textAlign: props.align ? props.align : 'left',
     ...(props.fontSize && {
         fontSize: props.fontSize

@@ -12,12 +12,11 @@ import { TouchableOpacity } from 'react-native';
 import Settings from '../screens/Settings';
 import Notifications from '../screens/Notifications';
 import Rooms from '../screens/Rooms';
+import { navigationLightTheme } from '../theme';
 
 export default function Navigation() {
-    const theme = useTheme();
-
     return (
-        <NavigationContainer linking={LinkingConfiguration} theme={theme}>
+        <NavigationContainer linking={LinkingConfiguration} theme={navigationLightTheme}>
             <RootNavigator />
         </NavigationContainer>
     );
@@ -46,7 +45,7 @@ function BottomTabNavigator() {
         <BottomTab.Navigator
             initialRouteName="Rooms"
             screenOptions={{
-                tabBarActiveTintColor: theme.colors.text,
+                tabBarActiveTintColor: theme.colors.text.main,
                 headerTitleAlign: 'left',
                 headerTitle: ({ children }) => <Heading1>{children}</Heading1>,
                 headerStyle: {
@@ -54,7 +53,7 @@ function BottomTabNavigator() {
                     backgroundColor: 'transparent'
                 },
                 tabBarStyle: {
-                    backgroundColor: theme.colors.card,
+                    backgroundColor: theme.colors.background.gray,
                     height: 56
                 },
                 tabBarIconStyle: {
@@ -88,12 +87,12 @@ function BottomTabNavigator() {
                     tabBarLabel: 'Rooms',
                     tabBarIcon: ({ color }) => <RoomsIcon width={24} height={24} fill={color} />,
                     headerRight: () => (
-                        <TouchableOpacity onPress={() => alert('This is a button!')}>
-                            <AddIcon width={32} height={32} fill={theme.colors.text} />
+                        <TouchableOpacity onPress={() => alert('Go to add room')}>
+                            <AddIcon width={32} height={32} fill={theme.colors.text.main} />
                         </TouchableOpacity>
                     ),
                     headerRightContainerStyle: {
-                        paddingRight: 16
+                        paddingRight: 20
                     }
                 }}
             />
