@@ -1,78 +1,88 @@
-/*
-  Rui Santos
-  Complete project details at Complete project details at https://RandomNerdTutorials.com/esp32-http-get-post-arduino/
+#include "time.h"
+#include "network.h"
+#include "sensordata.h"
+#include <wire.h>
+#include "MCP9800.h"
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
 
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-*/
+#define SAMPLE_SIZE 10
 
-#include <WiFi.h>
-#include <HTTPClient.h>
 
-const char* ssid = "Aleksander sin iPhone";
-const char* password = "12345678";
+/* Get timestamp from server */
+const char* ntpServer = "pool.ntp.org";
+unsigned long getTimeNow();
 
-//Your Domain name with URL path or IP address with path
-String serverName = "http://worldtimeapi.org/api/timezone/Europe/Oslo";
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastTime = 0;
-// Timer set to 10 minutes (600000)
-//unsigned long timerDelay = 600000;
-// Set timer to 5 seconds (5000)
-unsigned long timerDelay = 5000;
+int counter = 0;
+Sensordata data[10];
 
-void setup() {
-  Serial.begin(115200); 
-
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting");
-  while(WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("");
-  Serial.print("Connected to WiFi network with IP Address: ");
-  Serial.println(WiFi.localIP());
- 
-  Serial.println("Timer set to 5 seconds (timerDelay variable), it will take 5 seconds before publishing the first reading.");
+uint32_t samplingTimeSeconds(uint16_t seconds)
+{
+  return seconds*1000;
 }
 
-void loop() {
-  //Send an HTTP POST request every 10 minutes
-  if ((millis() - lastTime) > timerDelay) {
-    //Check WiFi connection status
-    if(WiFi.status()== WL_CONNECTED){
-      HTTPClient http;
 
-      String serverPath = serverName;
-      
-      // Your Domain name with URL path or IP address with path
-      http.begin(serverPath.c_str());
-      
-      // Send HTTP GET request
-      int httpResponseCode = http.GET();
-      
-      if (httpResponseCode>0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
-        String payload = http.getString();
-        Serial.println(payload);
-      }
-      else {
-        Serial.print("Error code: ");
-        Serial.println(httpResponseCode);
-      }
-      // Free resources
-      http.end();
-    }
-    else {
-      Serial.println("WiFi Disconnected");
-    }
-    lastTime = millis();
-  }
+void setup() 
+{
+  /* Enable pullup resistors for SDA and SCL */
+  digitalWrite(SDA, 1);
+  digitalWrite(SCL, 1);
+  Wire.begin();
+
+  /* Open serial communication */
+  Serial.begin(115200);
+
+  /* Configure the timezone and server api */
+  configTime(0, 0, ntpServer);
 }
+
+void loop() 
+{
+  /* Get time stamp for current reading */
+  connectWIFI();
+  unsigned long timeNow = getTimeNow();
+  while(timeNow == 0)
+  {
+    delay(200);
+    timeNow = getTimeNow();
+  }
+
+  /* Update data array */
+  data[counter].setTime(timeNow);
+  data[counter].setData(readTemp());
+
+  counter++;
+
+  /* When we have reached predefined amount of samples, push it to the AWS server */
+  if (counter > SAMPLE_SIZE)
+  {
+    connectAWS();
+    publishMessage(data, SAMPLE_SIZE);
+    counter = 0;
+    disconnectAWS();
+  }
+
+
+  /* Disconnecting wifi and sleeps until next sampling */
+  disconnectWIFI();
+  /* This delay is gonna be changed with deep sleep */
+  delay(samplingTimeSeconds(20));
+}
+
+
+
+
+unsigned long getTimeNow()
+{
+  time_t now;
+  struct tm timeinfo;
+  if (!getLocalTime(&timeinfo))
+  {
+    Serial.println("Failed to obtain time");
+    return(0);
+  }
+  time(&now);
+  return now;
+}
+
+
