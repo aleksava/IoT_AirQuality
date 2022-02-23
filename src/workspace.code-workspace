@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "..\\.."
+		},
+		{
+			"name": "IoT_AirQuality",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
