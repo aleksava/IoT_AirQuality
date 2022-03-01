@@ -9,6 +9,8 @@ declare global {
 }
 
 export type RootStackParamList = {
+    SignIn: undefined;
+    SignUp: undefined;
     Root: NavigatorScreenParams<RootTabParamList> | undefined;
 };
 
@@ -18,9 +20,25 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 >;
 
 export type RootTabParamList = {
-    Notifications: undefined;
-    Rooms: undefined;
+    NotificationsStack: NavigatorScreenParams<NotificationsStackParamList>;
+    RoomsStack: NavigatorScreenParams<RoomsStackParamList>;
     Settings: undefined;
+};
+
+type RoomParam = {
+    roomId: number;
+    measurement?: string;
+};
+
+export type NotificationsStackParamList = {
+    Notifications: undefined;
+    Room: RoomParam;
+};
+
+export type RoomsStackParamList = {
+    Rooms: undefined;
+    Room: RoomParam;
+    AddRoom: undefined;
 };
 
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> = CompositeScreenProps<

@@ -13,23 +13,36 @@ const linking: LinkingOptions<RootStackParamList> = {
     prefixes: [Linking.makeUrl('/')],
     config: {
         screens: {
+            SignIn: 'signin',
+            SignUp: 'signup',
             Root: {
                 screens: {
-                    Notifications: {
+                    NotificationsStack: {
+                        initialRouteName: 'Notifications',
                         screens: {
-                            NotificationsScreen: 'notifications'
+                            Notifications: 'notifications',
+                            Room: {
+                                path: 'room/:roomId/:measurement?',
+                                parse: {
+                                    id: Number
+                                }
+                            }
                         }
                     },
-                    Rooms: {
+                    RoomsStack: {
+                        initialRouteName: 'Rooms',
                         screens: {
-                            RoomsScreen: 'rooms'
+                            Rooms: 'rooms',
+                            Room: {
+                                path: 'room/:id',
+                                parse: {
+                                    id: Number
+                                }
+                            },
+                            AddRoom: 'addrooms'
                         }
                     },
-                    Settings: {
-                        screens: {
-                            SettingsScreen: 'settings'
-                        }
-                    }
+                    Settings: 'settings'
                 }
             }
         }
