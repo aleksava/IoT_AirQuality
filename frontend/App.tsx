@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { RecoilRoot } from 'recoil';
 import { ThemeProvider } from 'styled-components';
 
 import useCachedResources from './hooks/useCachedResources';
@@ -13,12 +14,14 @@ export default function App() {
         return null;
     } else {
         return (
-            <ThemeProvider theme={lightTheme}>
-                <SafeAreaProvider>
-                    <Navigation />
-                    <StatusBar />
-                </SafeAreaProvider>
-            </ThemeProvider>
+            <RecoilRoot>
+                <ThemeProvider theme={lightTheme}>
+                    <SafeAreaProvider>
+                        <Navigation />
+                        <StatusBar />
+                    </SafeAreaProvider>
+                </ThemeProvider>
+            </RecoilRoot>
         );
     }
 }

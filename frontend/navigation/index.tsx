@@ -169,22 +169,11 @@ function RoomsStack() {
                 component={Rooms}
                 options={{
                     title: 'My Rooms',
-                    header: (props) => (
-                        <Header
-                            type={HeaderType.Main}
-                            headerProps={props}
-                            headerRight={
-                                <IconButton
-                                    onPress={() => navigation.navigate('AddRoom')}
-                                    icon={
-                                        <AddIcon
-                                            width={32}
-                                            height={32}
-                                            fill={theme.colors.text.main}
-                                        />
-                                    }
-                                />
-                            }
+                    header: (props) => <Header type={HeaderType.Main} headerProps={props} />,
+                    headerRight: () => (
+                        <IconButton
+                            onPress={() => navigation.navigate('AddRoom')}
+                            icon={<AddIcon width={28} height={28} fill={theme.colors.text.main} />}
                         />
                     )
                 }}
@@ -193,6 +182,7 @@ function RoomsStack() {
                 name="Room"
                 component={Room}
                 options={{
+                    title: ' ',
                     header: (props) => <Header type={HeaderType.Stack} headerProps={props} />
                 }}
             />

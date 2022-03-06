@@ -1,6 +1,5 @@
 import { BottomTabHeaderProps } from '@react-navigation/bottom-tabs';
 import { NativeStackHeaderProps } from '@react-navigation/native-stack';
-import { ReactNode } from 'react';
 import { View } from 'react-native';
 import { getStatusBarHeight } from 'react-native-status-bar-height';
 import styled, { useTheme } from 'styled-components/native';
@@ -29,16 +28,18 @@ export enum HeaderType {
 interface Props {
     type: HeaderType;
     headerProps: BottomTabHeaderProps | NativeStackHeaderProps;
-    headerRight?: ReactNode;
 }
 
-export function Header({ type, headerProps, headerRight }: Props) {
+export function Header({ type, headerProps }: Props) {
     const theme = useTheme();
 
     const hasSubtitle = headerProps.options.title?.includes('|');
     const titleList = hasSubtitle ? headerProps.options.title?.split('|') : undefined;
     const title = titleList ? titleList[0] : headerProps.options.title || headerProps.route.name;
     const subtitle = titleList && titleList[1];
+
+    const headerRight =
+        headerProps.options.headerRight && headerProps.options.headerRight({ canGoBack: false });
 
     return (
         <Container>
@@ -66,7 +67,7 @@ export function Header({ type, headerProps, headerRight }: Props) {
                 </Heading1>
             )}
 
-            {headerRight || <View style={{ flexBasis: 32 }}></View>}
+            {headerRight || (type === HeaderType.Stack && <View style={{ flexBasis: 32 }}></View>)}
         </Container>
     );
 }

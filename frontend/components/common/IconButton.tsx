@@ -1,5 +1,14 @@
 import { ReactNode } from 'react';
-import { GestureResponderEvent, TouchableOpacity } from 'react-native';
+import { GestureResponderEvent } from 'react-native';
+import styled from 'styled-components/native';
+
+const Button = styled.TouchableOpacity({
+    width: '32px',
+    height: '32px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+});
 
 interface Props {
     onPress: (event?: GestureResponderEvent) => void;
@@ -7,5 +16,5 @@ interface Props {
 }
 
 export default function IconButton({ onPress, icon }: Props) {
-    return <TouchableOpacity onPress={() => onPress()}>{icon}</TouchableOpacity>;
+    return <Button onPress={() => onPress()}>{icon}</Button>;
 }

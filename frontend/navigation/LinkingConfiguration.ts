@@ -22,9 +22,9 @@ const linking: LinkingOptions<RootStackParamList> = {
                         screens: {
                             Notifications: 'notifications',
                             Room: {
-                                path: 'room/:roomId/:measurement?',
+                                path: 'room/:roomId',
                                 parse: {
-                                    id: Number
+                                    roomId: Number
                                 }
                             }
                         }
@@ -34,9 +34,9 @@ const linking: LinkingOptions<RootStackParamList> = {
                         screens: {
                             Rooms: 'rooms',
                             Room: {
-                                path: 'room/:id',
+                                path: 'room/:roomId',
                                 parse: {
-                                    id: Number
+                                    roomId: Number
                                 }
                             },
                             AddRoom: 'addrooms'

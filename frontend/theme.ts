@@ -27,7 +27,11 @@ export const lightTheme: DefaultTheme = {
             red: '#FBEAE5'
         },
         border: '#EBEBEB',
-        notification: '#E36E6E'
+        notification: '#E36E6E',
+        chart: {
+            gridLine: '#F0F2F3',
+            label: '#BABABA'
+        }
     },
     borderRadius: '4px',
     transitionDuration: 150

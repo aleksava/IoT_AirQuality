@@ -1,6 +1,7 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RoomData } from '../state/types';
 
 declare global {
     namespace ReactNavigation {
@@ -26,8 +27,7 @@ export type RootTabParamList = {
 };
 
 type RoomParam = {
-    roomId: number;
-    measurement?: string;
+    room: RoomData;
 };
 
 export type NotificationsStackParamList = {

@@ -16,6 +16,10 @@ declare module 'styled-components' {
             };
             border: string;
             notification: string;
+            chart: {
+                gridLine: string;
+                label: string;
+            };
         };
         borderRadius: string;
         transitionDuration: number;

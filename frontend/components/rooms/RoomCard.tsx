@@ -1,10 +1,10 @@
-import { NavigationProp, useLinkTo, useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Dimensions, TouchableOpacity } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { RoomsStackParamList } from '../../navigation/types';
-import { Room } from '../../screens/Rooms';
+import { NotificationType, RoomData } from '../../state/types';
 import Card from '../common/Card';
 import { Body1, Body2, Subheading2 } from '../common/Text';
 import { ExclamationIcon, NotificationIcon } from '../icons';
@@ -49,12 +49,12 @@ const NotificationText = styled(Body2).attrs({ bold: true })`
     })}
 `;
 
-function RoomCard({ item, index }: { item: Room; index: number }) {
+function RoomCard({ item, index }: { item: RoomData; index: number }) {
     const theme = useTheme();
     const navigation = useNavigation<NativeStackNavigationProp<RoomsStackParamList, 'Rooms'>>();
 
     return (
-        <TouchableOpacity onPress={() => navigation.navigate('Room', { roomId: item.id })}>
+        <TouchableOpacity onPress={() => navigation.navigate('Room', { room: item })}>
             <Container
                 index={index}
                 backgroundColor={
@@ -85,7 +85,9 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
                                 fill={theme.colors.notification}
                             />
                             <NotificationText numberOfLines={1} style={{ flexShrink: 1 }}>
-                                {item.notifications[0]}
+                                {item.notifications[0].type === NotificationType.OverMaxThreshold
+                                    ? `High ${item.notifications[0].measurement}`
+                                    : `Low ${item.notifications[0].measurement}`}
                             </NotificationText>
 
                             {/* Count the rest of the notifications, if any */}
