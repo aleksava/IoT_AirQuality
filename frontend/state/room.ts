@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { atom, selector } from 'recoil';
 import { RoomData, Measurement, NotificationType, Lookback, DataPoint, DeviceData } from './types';
-import { API_URL, BEARER_TOKEN } from '@env';
 import { measurements } from '../constants';
 
 export const roomIdState = atom<number | undefined>({
@@ -46,11 +45,14 @@ export const dataPointsState = selector<DataPoint[]>({
         const lookback = get(lookbackState);
 
         const deviceData = await axios
-            .get<DeviceData[]>(`${API_URL}/device_data/get_raw/2?lookback_start=${lookback}`, {
-                headers: {
-                    Authorization: `Bearer ${BEARER_TOKEN}`
+            .get<DeviceData[]>(
+                `${process.env.API_URL}/device_data/get_raw/2?lookback_start=${lookback}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.BEARER_TOKEN}`
+                    }
                 }
-            })
+            )
             .then((response) => {
                 return response;
             })
