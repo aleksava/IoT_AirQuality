@@ -7,7 +7,7 @@
 #include "sensordata.h"
 
 WiFiClientSecure net = WiFiClientSecure();
-MQTTClient client = MQTTClient(1024);
+MQTTClient client = MQTTClient(2048);
 
 
 void connectWIFI()
@@ -74,18 +74,41 @@ void disconnectAWS()
   disconnectWIFI();
 }
 
+// namespace ARDUINOJSON_NAMESPACE {
+// template <>
+// struct Converter<datapoint> {
+//   static bool toJson(const datapoint& src, VariantRef dst) {
+//     dst["temp"] = src._temp;
+//     dst["time"] = src._myTime;
+//     return true;
+//   }
+// };
+// }
 
-void publishMessage(Sensordata data[], uint8_t sample_size)
+
+void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sample_time)
 {
   StaticJsonDocument<1024> doc;
-  JsonArray Jtime = doc.createNestedArray("time");
-  JsonArray Jdata = doc.createNestedArray("temp");
 
+  /* Add first reading time */
+  doc["startMillisUTC"] = data[0].getTime();
+  doc["deltaMillis"] = delta_sample_time;
+
+  /* Add list of measurements labels */
+  JsonArray Jlabel = doc.createNestedArray("measurementLabels");
+  Jlabel.add("Temperature");
+  Jlabel.add("Pressure");
+  Jlabel.add("Humidity");
+  Jlabel.add("Gas");
+
+  /* Add all the measurements */
+  JsonArray Jmeasurements = doc.createNestedArray("measurements");
   for (int i=0; i < sample_size; i++)
   {
-    Jdata.add(data[i].getData());
-    Jtime.add(data[i].getTime());
-
+    Jmeasurements[i].add(data[i].getTemperature());
+    Jmeasurements[i].add(data[i].getPressure());
+    Jmeasurements[i].add(data[i].getHumidity());
+    Jmeasurements[i].add(data[i].getGas());
   }
 
   size_t memoryUsed = doc.memoryUsage();

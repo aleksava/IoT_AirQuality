@@ -21,7 +21,7 @@ void connectAWS();
 void disconnectAWS();
 
 /* Publish Sensordata to the AWS Topic in Json format */
-void publishMessage(Sensordata data[], uint8_t sample_size);
+void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sample_time);
 
 /* Messagehandler used to read incomming data from AWS subscription */
 void messageHandler(String &topic, String &payload);

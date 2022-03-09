@@ -9,13 +9,22 @@ class Sensordata
   public:
     // Sensordata(void);
     // ~Sensordata(void);
-    void setData(float data);
+    void setTemperature(float temperature);
+    void setPressure(float pressure);
+    void setHumidity(float humidity);
+    void setGas(float gas);
     void setTime(unsigned long time);
-    float getData(void);
+    float getTemperature(void);
+    float getPressure(void);
+    float getHumidity(void);
+    float getGas(void);
     unsigned long getTime(void);
     
   private:
-    float _data;
+    float _temperature;
+    float _pressure;
+    float _humidity;
+    float _gas;
     unsigned long _timestamp;
 };
 
