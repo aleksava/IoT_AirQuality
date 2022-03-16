@@ -36,7 +36,7 @@ public class DeviceDataRepository {
 
             String query =
                     "option v = {timeRangeStart: -" + lookbackHours + "h, timeRangeStop: -" + lookbackHoursEnd + "h}\n" +
-                    "from(bucket: \"iot_raw\")\n" +
+                    "from(bucket: \"raw_data_bucket\")\n" +
                     "    |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n" +
                     "    |> filter(fn: (r) => r[\"id\"] == \"" + deviceId + "\")\n" +
                     "    |> group(columns: [\"id\"])";

@@ -28,8 +28,8 @@ public class BaseUser_Room_Composite implements Serializable {
         this.room = room;
     }
 
-    public BaseUser getBaseUser() {
-        return baseUser;
+    public String getBaseUserName() {
+        return baseUser == null ? null : baseUser.getUsername();
     }
 
     public void setBaseUser(BaseUser baseUser) {

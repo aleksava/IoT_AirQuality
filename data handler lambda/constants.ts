@@ -1,4 +1,6 @@
-import { IMeasToThreshold } from "./types";
+import { IMeasToThreshold } from "./interfaces";
+
+export const supportedMeasurementLabels : string[] = ["co2", "iaq", "gas", "temperature", "humidity"];
 
 export const measurementThresholds : IMeasToThreshold = {
   "temperature": {

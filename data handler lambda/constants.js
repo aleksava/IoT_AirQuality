@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.measurementThresholds = void 0;
+exports.measurementThresholds = exports.supportedMeasurementLabels = void 0;
+exports.supportedMeasurementLabels = ["co2", "iaq", "gas", "temperature", "humidity"];
 exports.measurementThresholds = {
     "temperature": {
         threshold_low: 20,
