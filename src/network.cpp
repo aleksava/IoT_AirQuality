@@ -27,7 +27,7 @@ void connectWIFI()
 
 void disconnectWIFI()
 {
-  WiFi.disconnect();
+  WiFi.disconnect(true);
   Serial.println("Wifi Disconnected!");
 }
 
@@ -50,9 +50,10 @@ void connectAWS()
 
   while (!client.connect(THINGNAME)) {
     Serial.print(".");
-    delay(100);
+    delay(200);
   }
 
+  Serial.println("Found thingname!");
   if(!client.connected()){
     Serial.println("AWS IoT Timeout!");
     return;
@@ -74,34 +75,28 @@ void disconnectAWS()
   disconnectWIFI();
 }
 
-// namespace ARDUINOJSON_NAMESPACE {
-// template <>
-// struct Converter<datapoint> {
-//   static bool toJson(const datapoint& src, VariantRef dst) {
-//     dst["temp"] = src._temp;
-//     dst["time"] = src._myTime;
-//     return true;
-//   }
-// };
-// }
-
 
 void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sample_time)
 {
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<2048> doc;
 
   /* Add first reading time */
   doc["startMillisUTC"] = data[0].getTime();
   doc["deltaMillis"] = delta_sample_time;
 
   /* Add list of measurements labels */
+  Serial.println("Adding labels");
   JsonArray Jlabel = doc.createNestedArray("measurementLabels");
   Jlabel.add("Temperature");
   Jlabel.add("Pressure");
   Jlabel.add("Humidity");
   Jlabel.add("Gas");
+  Jlabel.add("Iaq");
+  Jlabel.add("CO2 Equivalent");
+  Jlabel.add("VOC Equivalent");
 
   /* Add all the measurements */
+  Serial.println("Adding elements");
   JsonArray Jmeasurements = doc.createNestedArray("measurements");
   for (int i=0; i < sample_size; i++)
   {
@@ -109,11 +104,14 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
     Jmeasurements[i].add(data[i].getPressure());
     Jmeasurements[i].add(data[i].getHumidity());
     Jmeasurements[i].add(data[i].getGas());
+    Jmeasurements[i].add(data[i].getIaq());
+    Jmeasurements[i].add(data[i].geteCo2());
+    Jmeasurements[i].add(data[i].geteVoc());
   }
-
+  Serial.println("Writing data");
   size_t memoryUsed = doc.memoryUsage();
   Serial.println("memory used: "); Serial.println(memoryUsed);
-  char jsonBuffer[1024];
+  char jsonBuffer[2048];
   serializeJson(doc, jsonBuffer); // print to client
   serializeJsonPretty(doc, Serial);
   if(!client.publish(AWS_IOT_PUBLISH_TOPIC, jsonBuffer))
@@ -124,7 +122,8 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
 
 
 /* Printing message */
-
-void messageHandler(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
+void messageHandler(String &topic, String &payload) 
+{
+  Serial.print("callback");
+  //Serial.println("incoming: " + topic + " - " + payload);
 }

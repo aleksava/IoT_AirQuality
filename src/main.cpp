@@ -2,18 +2,18 @@
 #include "network.h"
 #include "sensordata.h"
 #include <wire.h>
-#include <Adafruit_BME680.h>
-#include <Adafruit_Sensor.h>
+// #include <Adafruit_BME680.h>
+// #include <Adafruit_Sensor.h>
 #include <bsec.h>
 #include <EEPROM.h>
 #include "bme680.h"
 
 
 #define BME680_CLIENT_ADDR  0x77
-Adafruit_BME680 bme;
+// Adafruit_BME680 bme;
 
 
-#define SAMPLE_SIZE       10
+#define SAMPLE_SIZE             4
 #define DELTA_SAMPLE_TIME_MS    5000
 
 
@@ -28,10 +28,7 @@ Sensordata data[SAMPLE_SIZE];
 
 // Create an object of the class Bsec
 Bsec iaqSensor;
-
 String output;
-
-
 
 
 void setup() 
@@ -51,41 +48,35 @@ void setup()
   Wire.begin();
 
   iaqSensor.begin(BME680_CLIENT_ADDR, Wire);
-  output = "\nBSEC library version " + String(iaqSensor.version.major) + "." + String(iaqSensor.version.minor) + "." + String(iaqSensor.version.major_bugfix) + "." + String(iaqSensor.version.minor_bugfix);
-  Serial.println(output);
+
   checkIaqSensorStatus(iaqSensor);
 
   loadState(iaqSensor);
 
-  bsec_virtual_sensor_t sensorList[7] = {
+  bsec_virtual_sensor_t sensorList[10] = {
     BSEC_OUTPUT_RAW_TEMPERATURE,
     BSEC_OUTPUT_RAW_PRESSURE,
     BSEC_OUTPUT_RAW_HUMIDITY,
     BSEC_OUTPUT_RAW_GAS,
     BSEC_OUTPUT_IAQ,
+    BSEC_OUTPUT_STATIC_IAQ,
+    BSEC_OUTPUT_CO2_EQUIVALENT,
+    BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
     BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
     BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
   };
 
-  iaqSensor.updateSubscription(sensorList, 7, BSEC_SAMPLE_RATE_LP);
+  Serial.println("trying to sub");
+  iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_LP);
   checkIaqSensorStatus(iaqSensor);
 
   // Print the header
-  output = "Timestamp [ms], raw temperature [°C], pressure [hPa], raw relative humidity [%], gas [Ohm], IAQ, IAQ accuracy, temperature [°C], relative humidity [%], Static IAQ, CO2 equivalent, breath VOC equivalent";
+  output = "Timestamp [ms], raw temperature [°C], \
+            pressure [hPa], raw relative humidity [%], \
+            gas [Ohm], IAQ, IAQ accuracy, temperature [°C],\
+             relative humidity [%], Static IAQ, CO2 equivalent,\
+              breath VOC equivalent";
   Serial.println(output);
-
-  // while (!bme.begin(BME680_CLIENT_ADDR)) {
-  //   Serial.println("Could not find a valid BME680 sensor, check wiring!");
-  //   delay(1000);
-  // }
-
-  // // Set up oversampling and filter initialization
-  // bme.setTemperatureOversampling(BME680_OS_8X);
-  // bme.setHumidityOversampling(BME680_OS_2X);
-  // bme.setPressureOversampling(BME680_OS_4X);
-  // bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  // bme.setGasHeater(320, 150); // 320*C for 150 ms
-
 
   /* Configure the timezone and server api */
   configTime(0, 0, ntpServer);
@@ -115,21 +106,20 @@ void loop()
 
 
 
-
-  // if (counter == 0)
-  // {
-  //   /* Get time stamp for current reading */
-  //   connectWIFI();
-  //   unsigned long timeNow = getTimeNow();
-  //   while(timeNow == 0)
-  //   {
-  //     delay(500);
-  //     timeNow = getTimeNow();
-  //   }
-  //   data[counter].setTime(timeNow);
-  //   /* Disconnecting wifi and sleeps until next sampling */
-  //   disconnectWIFI();
-  // }
+  if (counter == 0)
+  {
+    /* Get time stamp for current reading */
+    connectWIFI();
+    unsigned long timeNow = getTimeNow();
+    while(timeNow == 0)
+    {
+      delay(500);
+      timeNow = getTimeNow();
+    }
+    data[counter].setTime(timeNow);
+    /* Disconnecting wifi and sleeps until next sampling */
+    disconnectWIFI();
+  }
 
 
   // /* Read sensor data */
@@ -140,43 +130,28 @@ void loop()
   // }
 
   // /* Update data array */
-  // data[counter].setTemperature(bme.temperature);
-  // data[counter].setPressure(bme.pressure / 100.0);
-  // data[counter].setHumidity(bme.humidity);
-  // data[counter].setGas(bme.gas_resistance / 1000.0);
+  data[counter].updateSensordata(iaqSensor);
 
-  // counter++;
-
-  // /* When we have reached predefined amount of samples, push it to the AWS server */
-  // if (counter > SAMPLE_SIZE)
-  // {
-  //   connectAWS();
-  //   publishMessage(data, SAMPLE_SIZE, DELTA_SAMPLE_TIME_MS);
-  //   counter = 0;
-  //   disconnectAWS();
-  // }
-
-  // /* This delay is gonna be changed with deep sleep */
-  // delay(DELTA_SAMPLE_TIME_MS);
+  // data[counter].setTemperature(iaqSensor.rawTemperature);
+  // data[counter].setPressure(iaqSensor.pressure / 100.0);
+  // data[counter].setHumidity(iaqSensor.rawHumidity);
+  // data[counter].setGas(iaqSensor.gasResistance / 1000.0);
 
 
-  // Serial.print("Temperature = ");
-  // Serial.print(bme.temperature);
-  // Serial.println(" *C");
 
-  // Serial.print("Pressure = ");
-  // Serial.print(bme.pressure / 100.0);
-  // Serial.println(" hPa");
+  counter++;
 
-  // Serial.print("Humidity = ");
-  // Serial.print(bme.humidity);
-  // Serial.println(" %");
+  /* When we have reached predefined amount of samples, push it to the AWS server */
+  if (counter > SAMPLE_SIZE)
+  {
+    connectAWS();
+    publishMessage(data, SAMPLE_SIZE, DELTA_SAMPLE_TIME_MS);
+    counter = 0;
+    disconnectAWS();
+  }
 
-  // Serial.print("Gas = ");
-  // Serial.print(bme.gas_resistance / 1000.0);
-  // Serial.println(" KOhms");
-
-  // Serial.println();
+  /* This delay is gonna be changed with deep sleep */
+  delay(DELTA_SAMPLE_TIME_MS);
 }
 
 
