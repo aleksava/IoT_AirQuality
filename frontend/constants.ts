@@ -19,13 +19,13 @@ export const measurements: { [key in Measurement]: IMeasurement } = {
         yAxisMinValue: 0,
         yAxisMaxValue: 80
     },
-    [Measurement.Pressure]: {
-        name: 'Pressure',
-        unit: ' hPa',
-        decimals: 0,
-        yAxisMaxValue: 0,
-        yAxisMinValue: 100
-    },
+    // [Measurement.Pressure]: {
+    //     name: 'Pressure',
+    //     unit: ' hPa',
+    //     decimals: 0,
+    //     yAxisMaxValue: 0,
+    //     yAxisMinValue: 100
+    // },
     [Measurement.AirQuality]: {
         name: 'Air Quality',
         unit: '',
@@ -37,7 +37,8 @@ export const measurements: { [key in Measurement]: IMeasurement } = {
         name: 'CO2',
         unit: ' ppb',
         decimals: 0,
+        maxThreshold: 1000,
         yAxisMinValue: 0,
-        yAxisMaxValue: 100
+        yAxisMaxValue: 1100
     }
 };

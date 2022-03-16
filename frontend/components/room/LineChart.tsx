@@ -15,6 +15,7 @@ import { Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useMemo } from 'react';
 
 const screenWidth = Dimensions.get('window').width;
+const now = new Date();
 
 export default function LineChart() {
     const theme = useTheme();
@@ -28,7 +29,6 @@ export default function LineChart() {
 
     const lookback = useRecoilValue(lookbackState);
 
-    const now = new Date();
     const lookbackDate = useMemo(() => {
         const date = new Date();
         date.setHours(date.getHours() - lookback);
@@ -46,6 +46,7 @@ export default function LineChart() {
         >
             <VictoryAxis
                 dependentAxis
+                crossAxis={false}
                 tickFormat={(tick) => tick + measurementInfo.unit}
                 style={{
                     axis: { stroke: 'transparent' },
@@ -86,20 +87,9 @@ export default function LineChart() {
                         fill: 'url(#gradientStroke)',
                         stroke: theme.colors.primary,
                         strokeWidth: 2
-                    },
-                    labels: {
-                        fill: theme.colors.text.main,
-                        fontFamily: processFontFamily('notosans-medium')!,
-                        fontSize: '12px'
                     }
                 }}
                 data={dataPoints}
-                labels={({ data, datum, index }) =>
-                    index == data.length - 1
-                        ? (datum.value as number).toFixed(measurementInfo.decimals) +
-                          measurementInfo.unit
-                        : null
-                }
                 x="timestamp"
                 y="value"
                 interpolation="monotoneX"
@@ -113,7 +103,7 @@ export default function LineChart() {
                     style={{
                         data: {
                             stroke: theme.colors.notification,
-                            strokeWidth: 1,
+                            strokeWidth: 1.5,
                             strokeDasharray: 8,
                             strokeOpacity: 0.5
                         }
@@ -127,7 +117,7 @@ export default function LineChart() {
                     style={{
                         data: {
                             stroke: theme.colors.notification,
-                            strokeWidth: 1,
+                            strokeWidth: 1.5,
                             strokeDasharray: 8,
                             strokeOpacity: 0.5
                         }

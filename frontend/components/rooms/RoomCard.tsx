@@ -4,9 +4,9 @@ import React from 'react';
 import { Dimensions, TouchableOpacity } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { RoomsStackParamList } from '../../navigation/types';
-import { NotificationType, RoomData } from '../../state/types';
+import { Notification, NotificationType, Room } from '../../state/types';
 import Card from '../common/Card';
-import { Body1, Body2, Subheading2 } from '../common/Text';
+import { Body1, Body2 } from '../common/Text';
 import { ExclamationIcon, NotificationIcon } from '../icons';
 
 const window = Dimensions.get('window');
@@ -49,21 +49,25 @@ const NotificationText = styled(Body2).attrs({ bold: true })`
     })}
 `;
 
-function RoomCard({ item, index }: { item: RoomData; index: number }) {
+function RoomCard({ item, index }: { item: Room; index: number }) {
     const theme = useTheme();
     const navigation = useNavigation<NativeStackNavigationProp<RoomsStackParamList, 'Rooms'>>();
+
+    // TODO: Get current notifications for room
+    const notifications: Notification[] = [];
+
+    // TODO: Get notification status for room
+    const notificationsOn: boolean = false;
 
     return (
         <TouchableOpacity onPress={() => navigation.navigate('Room', { room: item })}>
             <Container
                 index={index}
-                backgroundColor={
-                    item.notifications.length > 0 ? theme.colors.background.red : undefined
-                }
+                backgroundColor={notifications.length > 0 ? theme.colors.background.red : undefined}
             >
                 <TitleContainer>
-                    <RoomName numberOfLines={1}>{item.name}</RoomName>
-                    {item.notificationsOn && (
+                    <RoomName numberOfLines={1}>{item.roomName}</RoomName>
+                    {notificationsOn && (
                         <NotificationIcon
                             width={14}
                             height={14}
@@ -73,10 +77,10 @@ function RoomCard({ item, index }: { item: RoomData; index: number }) {
                     )}
                 </TitleContainer>
 
-                <Subheading2 numberOfLines={1}>{item.building}</Subheading2>
+                {/* <Subheading2 numberOfLines={1}>{item.building}</Subheading2> */}
 
                 <NotificationContainer>
-                    {item.notifications.length > 0 && (
+                    {notifications.length > 0 && (
                         <>
                             {/* Show first notification */}
                             <ExclamationIcon
@@ -85,15 +89,15 @@ function RoomCard({ item, index }: { item: RoomData; index: number }) {
                                 fill={theme.colors.notification}
                             />
                             <NotificationText numberOfLines={1} style={{ flexShrink: 1 }}>
-                                {item.notifications[0].type === NotificationType.OverMaxThreshold
-                                    ? `High ${item.notifications[0].measurement}`
-                                    : `Low ${item.notifications[0].measurement}`}
+                                {notifications[0].type === NotificationType.OverMaxThreshold
+                                    ? `High ${notifications[0].measurement}`
+                                    : `Low ${notifications[0].measurement}`}
                             </NotificationText>
 
                             {/* Count the rest of the notifications, if any */}
-                            {item.notifications.length > 1 && (
+                            {notifications.length > 1 && (
                                 <NotificationText numberOfLines={1}>
-                                    +{item.notifications.length - 1}
+                                    +{notifications.length - 1}
                                 </NotificationText>
                             )}
                         </>

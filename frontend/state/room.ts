@@ -1,6 +1,14 @@
 import axios from 'axios';
 import { atom, selector } from 'recoil';
-import { RoomData, Measurement, NotificationType, Lookback, DataPoint, DeviceData } from './types';
+import {
+    Measurement,
+    NotificationType,
+    Lookback,
+    DataPoint,
+    DeviceData,
+    Device,
+    Notification
+} from './types';
 import { measurements } from '../constants';
 
 export const roomIdState = atom<number | undefined>({
@@ -13,29 +21,31 @@ export const currentMeasurementState = atom<Measurement>({
     default: Measurement.Temperature
 });
 
-export const roomInfoState = selector<RoomData>({
-    key: 'roomInfo',
+export const roomDevicesState = selector<Device[]>({
+    key: 'roomDevices',
     get: async ({ get }) => {
         const roomId = get(roomIdState);
 
-        return {
-            id: 1,
-            name: 'R92',
-            building: 'Realfagbygget',
-            notificationsOn: true,
-            notifications: [
-                {
-                    measurement: Measurement.Temperature,
-                    type: NotificationType.OverMaxThreshold
+        const devices = await axios
+            .get<Device[]>(`${process.env.API_URL}/devices/get_for_room/${roomId}`, {
+                headers: {
+                    Authorization: `Bearer ${process.env.BEARER_TOKEN}`
                 }
-            ]
-        };
+            })
+            .then((response) => {
+                return response;
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+        return devices && devices.data ? devices.data : [];
     }
 });
 
 export const lookbackState = atom<Lookback>({
     key: 'lookback',
-    default: 6
+    default: 1
 });
 
 export const dataPointsState = selector<DataPoint[]>({
@@ -81,6 +91,17 @@ export const dataPointsValuesState = selector<number[]>({
     }
 });
 
+export const currentValueState = selector<DataPoint | undefined>({
+    key: 'currentValue',
+    get: async ({ get }) => {
+        const dataPoints = get(dataPointsCurrentMeasurementState);
+
+        if (dataPoints.length > 0) {
+            return dataPoints[dataPoints.length - 1];
+        }
+    }
+});
+
 export const yAxisMaxValueState = selector<number>({
     key: 'yAxisMaxValue',
     get: ({ get }) => {
@@ -112,5 +133,58 @@ export const yAxisMinValueState = selector<number>({
         }
 
         return minValue;
+    }
+});
+
+export const notificationsState = selector<Notification[]>({
+    key: 'notificationsState',
+    get: ({ get }) => {
+        const dataPoints = get(dataPointsState);
+
+        const notifications: Notification[] = [];
+
+        const twoHoursAgo = Date.now() - 1000 * 60 * 60 * 2;
+
+        Object.entries(measurements).forEach(([key, measurement]) => {
+            const filteredDataPoints = dataPoints.filter((d) => d.field == key);
+
+            if (filteredDataPoints.length > 0) {
+                const newestDataPoint = filteredDataPoints[filteredDataPoints.length - 1];
+                const newestDataPointDate = new Date(newestDataPoint.timestamp);
+
+                // Add notification if newest data point timestamp is within the last two hours
+                if (newestDataPointDate.getTime() > twoHoursAgo) {
+                    if (
+                        measurement.maxThreshold &&
+                        newestDataPoint.value > measurement.maxThreshold
+                    ) {
+                        notifications.push({
+                            measurement: key as Measurement,
+                            type: NotificationType.OverMaxThreshold
+                        });
+                    } else if (
+                        measurement.minThreshold &&
+                        newestDataPoint.value < measurement.minThreshold
+                    ) {
+                        notifications.push({
+                            measurement: key as Measurement,
+                            type: NotificationType.UnderMinThreshold
+                        });
+                    }
+                }
+            }
+        });
+
+        return notifications;
+    }
+});
+
+export const currentNotificationState = selector<Notification | undefined>({
+    key: 'currentNotificationState',
+    get: ({ get }) => {
+        const notifications = get(notificationsState);
+        const currentMeasurement = get(currentMeasurementState);
+
+        return notifications.find((n) => n.measurement === currentMeasurement);
     }
 });

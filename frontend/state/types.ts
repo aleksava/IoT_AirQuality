@@ -1,9 +1,16 @@
-export interface RoomData {
+export interface Room {
     id: number;
-    name: string;
-    building: string;
-    notificationsOn: boolean;
-    notifications: Notification[];
+    roomName: string;
+    organizationId: number;
+}
+
+export interface Device {
+    id: number;
+    deviceName: string;
+    lat: number;
+    lng: number;
+    organizationId: number;
+    roomId: number;
 }
 
 export interface DataPoint {
@@ -25,7 +32,7 @@ export interface Notification {
 export enum Measurement {
     Temperature = 'temperature',
     Humidity = 'humidity',
-    Pressure = 'pressure',
+    // Pressure = 'pressure',
     AirQuality = 'IAQ',
     CO2 = 'CO2'
 }
@@ -41,11 +48,12 @@ export interface IMeasurement {
     decimals: number;
     minThreshold?: number;
     maxThreshold?: number;
-    yAxisMinValue: number;
-    yAxisMaxValue: number;
+    yAxisMinValue?: number;
+    yAxisMaxValue?: number;
 }
 
 export type Lookback =
+    | 1
     | 3
     | 6
     | 12

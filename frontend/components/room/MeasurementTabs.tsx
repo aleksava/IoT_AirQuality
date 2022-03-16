@@ -1,13 +1,22 @@
+import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { measurements } from '../../constants';
 import useLoadable from '../../hooks/useLoadable';
-import { currentMeasurementState, roomInfoState } from '../../state/room';
-import { Measurement } from '../../state/types';
+import { currentMeasurementState, notificationsState } from '../../state/room';
+import { Measurement, Notification } from '../../state/types';
 import { Tab, Tabs } from '../common/Tabs';
 
 export default function MeasurementTabs() {
-    const { data: roomInfo } = useLoadable(roomInfoState);
+    const { data: notifications } = useLoadable(notificationsState);
     const [currentMeasurement, setCurrentMeasurement] = useRecoilState(currentMeasurementState);
+
+    const [persistentNotifications, setPersistentNotifications] = useState<Notification[]>([]);
+
+    useEffect(() => {
+        if (notifications) {
+            setPersistentNotifications(notifications);
+        }
+    }, [notifications]);
 
     return (
         <Tabs>
@@ -17,10 +26,8 @@ export default function MeasurementTabs() {
                     index={i}
                     selected={key === currentMeasurement}
                     warning={
-                        roomInfo &&
-                        roomInfo.notifications.some(
-                            (notification) => notification.measurement == key
-                        )
+                        persistentNotifications &&
+                        persistentNotifications.some((n) => n.measurement == key)
                     }
                     onPress={() => {
                         setCurrentMeasurement(key as Measurement);

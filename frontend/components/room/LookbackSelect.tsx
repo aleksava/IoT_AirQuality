@@ -1,6 +1,6 @@
 import RNPickerSelect from 'react-native-picker-select';
 import { useRecoilState } from 'recoil';
-import styled, { useTheme } from 'styled-components/native';
+import { useTheme } from 'styled-components/native';
 import { lookbackState } from '../../state/room';
 import { ArrowSmallDownIcon } from '../icons';
 
@@ -51,6 +51,7 @@ export default function LookbackSelect() {
                 }
             }}
             items={[
+                { label: '1 hour', value: 1 },
                 { label: '3 hours', value: 3 },
                 { label: '6 hours', value: 6 },
                 { label: '12 hours', value: 12 },
