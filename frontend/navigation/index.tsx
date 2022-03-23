@@ -24,6 +24,7 @@ import { Header, HeaderType } from '../components/common/Header';
 import IconButton from '../components/common/IconButton';
 import SignIn from '../screens/SignIn';
 import SignUp from '../screens/SignUp';
+import notificationHandler from '../utils/notificationHandler';
 
 export default function Navigation() {
     return (
@@ -35,6 +36,8 @@ export default function Navigation() {
 
 function RootNavigator() {
     const Stack = createNativeStackNavigator<RootStackParamList>();
+
+    notificationHandler();
 
     // TODO: Get signed in state
     const isSignedIn = true;

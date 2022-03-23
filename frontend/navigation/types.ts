@@ -28,6 +28,7 @@ export type RootTabParamList = {
 
 type RoomParam = {
     room: Room;
+    measurement?: string;
 };
 
 export type NotificationsStackParamList = {

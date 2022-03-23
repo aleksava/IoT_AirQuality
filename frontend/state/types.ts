@@ -32,7 +32,7 @@ export interface Notification {
 export enum Measurement {
     Temperature = 'temperature',
     Humidity = 'humidity',
-    // Pressure = 'pressure',
+    Pressure = 'pressure',
     AirQuality = 'IAQ',
     CO2 = 'CO2'
 }

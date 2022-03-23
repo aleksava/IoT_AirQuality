@@ -9,7 +9,8 @@ import LookbackSelect from '../components/room/LookbackSelect';
 import MeasurementTabs from '../components/room/MeasurementTabs';
 import Notification from '../components/room/Notification';
 import { NotificationsStackParamList, RoomsStackParamList } from '../navigation/types';
-import { roomIdState } from '../state/room';
+import { currentMeasurementState, roomIdState } from '../state/room';
+import { Measurement } from '../state/types';
 
 const Container = styled.View({
     width: '100%',
@@ -36,13 +37,21 @@ export default function Room({
     const theme = useTheme();
 
     const roomParams = route.params.room;
+    const measurement = route.params.measurement;
 
     const setRoomId = useSetRecoilState(roomIdState);
+    const setCurrentMeasurement = useSetRecoilState(currentMeasurementState);
 
     useEffect(() => {
         navigation.setOptions({ title: `${roomParams.roomName}` });
         setRoomId(roomParams.id);
     }, []);
+
+    useEffect(() => {
+        if (measurement) {
+            setCurrentMeasurement(measurement as Measurement);
+        }
+    }, [measurement]);
 
     return (
         <View>

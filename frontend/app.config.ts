@@ -1,7 +1,7 @@
 export default {
     expo: {
-        name: 'frontend',
-        slug: 'frontend',
+        name: 'eitaq',
+        slug: 'eitaq',
         version: '1.0.0',
         orientation: 'portrait',
         icon: './assets/images/icon.png',
