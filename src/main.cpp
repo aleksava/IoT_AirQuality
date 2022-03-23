@@ -1,82 +1,52 @@
 #include "time.h"
 #include "network.h"
 #include "sensordata.h"
-#include <wire.h>
-// #include <Adafruit_BME680.h>
-// #include <Adafruit_Sensor.h>
-#include <bsec.h>
-#include <EEPROM.h>
-#include "bme680.h"
-
-
-#define BME680_CLIENT_ADDR  0x77
-// Adafruit_BME680 bme;
+#include <Wire.h>
+#include <Adafruit_BME680.h>
+#include <Adafruit_Sensor.h>
+#include <esp_sleep.h>
 
 
 #define SAMPLE_SIZE             4
-#define DELTA_SAMPLE_TIME_MS    5000
+#define UNIT_DOWN(i)            (i*1000)
+#define MS_READ_PERIOD          UNIT_DOWN(15)       
+#define US_READ_PERIOD          UNIT_DOWN(UNIT_DOWN(15)) // seconds between each sensor reading
 
+
+void sleepState(bool deep);
 
 /* Get timestamp from server */
 const char* ntpServer = "pool.ntp.org";
-unsigned long getTimeNow();
+time_t getTimeNow();
 
-
+Adafruit_BME680 bme;
 int counter = 0;
 Sensordata data[SAMPLE_SIZE];
 
 
-// Create an object of the class Bsec
-Bsec iaqSensor;
-String output;
-
 
 void setup() 
 {
-  EEPROM.begin(BSEC_MAX_STATE_BLOB_SIZE + 1); // 1st address for the length
-
-
   /* Open serial communication */
   Serial.begin(115200);
 
   while (!Serial);
   Serial.println(F("BME680 test"));
 
-  /* Enable pullup resistors for SDA and SCL */
-  digitalWrite(SDA, 1);
-  digitalWrite(SCL, 1);
-  Wire.begin();
 
-  iaqSensor.begin(BME680_CLIENT_ADDR, Wire);
 
-  checkIaqSensorStatus(iaqSensor);
+  if (!bme.begin()) {
+    Serial.println(F("Could not find a valid BME680 sensor, check wiring!"));
+    while (1);
+  }
 
-  loadState(iaqSensor);
+  // Set up oversampling and filter initialization
+  bme.setTemperatureOversampling(BME680_OS_8X);
+  bme.setHumidityOversampling(BME680_OS_2X);
+  bme.setPressureOversampling(BME680_OS_4X);
+  bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
+  bme.setGasHeater(320, 150); // 320*C for 150 ms
 
-  bsec_virtual_sensor_t sensorList[10] = {
-    BSEC_OUTPUT_RAW_TEMPERATURE,
-    BSEC_OUTPUT_RAW_PRESSURE,
-    BSEC_OUTPUT_RAW_HUMIDITY,
-    BSEC_OUTPUT_RAW_GAS,
-    BSEC_OUTPUT_IAQ,
-    BSEC_OUTPUT_STATIC_IAQ,
-    BSEC_OUTPUT_CO2_EQUIVALENT,
-    BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
-    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
-    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
-  };
-
-  Serial.println("trying to sub");
-  iaqSensor.updateSubscription(sensorList, 10, BSEC_SAMPLE_RATE_LP);
-  checkIaqSensorStatus(iaqSensor);
-
-  // Print the header
-  output = "Timestamp [ms], raw temperature [°C], \
-            pressure [hPa], raw relative humidity [%], \
-            gas [Ohm], IAQ, IAQ accuracy, temperature [°C],\
-             relative humidity [%], Static IAQ, CO2 equivalent,\
-              breath VOC equivalent";
-  Serial.println(output);
 
   /* Configure the timezone and server api */
   configTime(0, 0, ntpServer);
@@ -84,32 +54,10 @@ void setup()
 
 void loop() 
 {
-  unsigned long time_trigger = millis();
-  if (iaqSensor.run()) { // If new data is available
-    output = String(time_trigger);
-    output += ", " + String(iaqSensor.rawTemperature);
-    output += ", " + String(iaqSensor.pressure);
-    output += ", " + String(iaqSensor.rawHumidity);
-    output += ", " + String(iaqSensor.gasResistance);
-    output += ", " + String(iaqSensor.iaq);
-    output += ", " + String(iaqSensor.iaqAccuracy);
-    output += ", " + String(iaqSensor.temperature);
-    output += ", " + String(iaqSensor.humidity);
-    output += ", " + String(iaqSensor.staticIaq);
-    output += ", " + String(iaqSensor.co2Equivalent);
-    output += ", " + String(iaqSensor.breathVocEquivalent);
-    Serial.println(output);
-    updateState(iaqSensor);
-  } else {
-    checkIaqSensorStatus(iaqSensor);
-  }
-
-
-
   if (counter == 0)
   {
     /* Get time stamp for current reading */
-    connectWIFI();
+    connectWiFi();
     unsigned long timeNow = getTimeNow();
     while(timeNow == 0)
     {
@@ -117,26 +65,24 @@ void loop()
       timeNow = getTimeNow();
     }
     data[counter].setTime(timeNow);
-    /* Disconnecting wifi and sleeps until next sampling */
-    disconnectWIFI();
+    /* Disconnecting WiFi and sleeps until next sampling */
+    disconnectWiFi();
   }
 
+  /* Read sensor data */
+  while (! bme.performReading()) 
+  {
+    Serial.println("Failed to perform reading :(");
+    delay(1000);
+  }
 
-  // /* Read sensor data */
-  // while (! bme.performReading()) 
-  // {
-  //   Serial.println("Failed to perform reading :(");
-  //   delay(1000);
-  // }
-
-  // /* Update data array */
-  data[counter].updateSensordata(iaqSensor);
-
-  // data[counter].setTemperature(iaqSensor.rawTemperature);
-  // data[counter].setPressure(iaqSensor.pressure / 100.0);
-  // data[counter].setHumidity(iaqSensor.rawHumidity);
-  // data[counter].setGas(iaqSensor.gasResistance / 1000.0);
-
+  /* Update data to send */
+  data[counter].setTemperature(bme.temperature);
+  data[counter].setPressure(bme.pressure / 100.0);
+  data[counter].setHumidity(bme.humidity);
+  float comp_gas = log(bme.gas_resistance) + 0.04 * bme.humidity;
+  float IAQ = (1 - (comp_gas/100)) * 500;
+  data[counter].setIaq(comp_gas);
 
 
   counter++;
@@ -145,28 +91,52 @@ void loop()
   if (counter > SAMPLE_SIZE)
   {
     connectAWS();
-    publishMessage(data, SAMPLE_SIZE, DELTA_SAMPLE_TIME_MS);
+    publishMessage(data, SAMPLE_SIZE, MS_READ_PERIOD);
     counter = 0;
     disconnectAWS();
+    sleepState(true);
   }
-
-  /* This delay is gonna be changed with deep sleep */
-  delay(DELTA_SAMPLE_TIME_MS);
+  else
+  {
+    sleepState(false);
+  }
 }
 
-
-
-unsigned long getTimeNow()
+time_t getTimeNow()
 {
-  time_t now;
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo))
   {
     Serial.println("Failed to obtain time");
     return(0);
   }
-  time(&now);
-  return now;
+  return mktime(&timeinfo);
 }
 
 
+
+void sleepState(bool deep)
+{
+  disconnectWiFi();
+  Serial.flush();
+
+  /* Disabling all wakeup sources, so that only the timer (enabled again
+   * further down) may wake the sleep */
+  esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+
+  /* Only the RTC is needed for sleep wakeup, so all RTC peripherals
+   * can be powered down during sleep */
+  esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_OFF);
+
+  if(deep)
+  {
+    esp_sleep_enable_timer_wakeup(US_READ_PERIOD);
+    esp_deep_sleep_start();
+  }
+
+  else
+  {
+    esp_sleep_enable_timer_wakeup(US_READ_PERIOD);
+    esp_light_sleep_start();
+  }
+}

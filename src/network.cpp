@@ -10,31 +10,31 @@ WiFiClientSecure net = WiFiClientSecure();
 MQTTClient client = MQTTClient(2048);
 
 
-void connectWIFI()
+void connectWiFi()
 {
+  WiFi.disconnect(false);
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
   Serial.println("Connecting to Wi-Fi");
-
   while (WiFi.status() != WL_CONNECTED){
     delay(100);
     Serial.print(".");
   }
-
-  Serial.println("Wifi Connected!");
+  Serial.println("\nWifi Connected!");
 }
 
-void disconnectWIFI()
+void disconnectWiFi()
 {
   WiFi.disconnect(true);
   Serial.println("Wifi Disconnected!");
 }
 
 
+
 void connectAWS()
 {
-  connectWIFI();
+  connectWiFi();
   // Configure WiFiClientSecure to use the AWS IoT device credentials
   net.setCACert(AWS_CERT_CA);
   net.setCertificate(AWS_CERT_CRT);
@@ -72,7 +72,7 @@ void disconnectAWS()
         {  }
   Serial.println("AWS IoT Disconnected!");
 
-  disconnectWIFI();
+  disconnectWiFi();
 }
 
 
@@ -90,10 +90,7 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
   Jlabel.add("Temperature");
   Jlabel.add("Pressure");
   Jlabel.add("Humidity");
-  Jlabel.add("Gas");
-  Jlabel.add("Iaq");
-  Jlabel.add("CO2 Equivalent");
-  Jlabel.add("VOC Equivalent");
+  Jlabel.add("Rel Air quality");
 
   /* Add all the measurements */
   Serial.println("Adding elements");
@@ -103,10 +100,8 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
     Jmeasurements[i].add(data[i].getTemperature());
     Jmeasurements[i].add(data[i].getPressure());
     Jmeasurements[i].add(data[i].getHumidity());
-    Jmeasurements[i].add(data[i].getGas());
     Jmeasurements[i].add(data[i].getIaq());
-    Jmeasurements[i].add(data[i].geteCo2());
-    Jmeasurements[i].add(data[i].geteVoc());
+
   }
   Serial.println("Writing data");
   size_t memoryUsed = doc.memoryUsage();

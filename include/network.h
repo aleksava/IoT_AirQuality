@@ -12,9 +12,9 @@
 extern WiFiClientSecure net;
 extern MQTTClient client;
 
-/* Sets up the wifi peripheral and connects to wifi details set in secret.h */
-void connectWIFI();
-void disconnectWIFI();
+/* Sets up the WiFi peripheral and connects to WiFi details set in secret.h */
+void connectWiFi();
+void disconnectWiFi();
 
 /* Connects to AWS following the certificates set in secret.h */
 void connectAWS();
