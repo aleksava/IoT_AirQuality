@@ -6,6 +6,7 @@
 #include <Adafruit_Sensor.h>
 #include <esp_sleep.h>
 
+#include "Adafruit_PM25AQI.h"
 
 #define SAMPLE_SIZE             4
 #define UNIT_DOWN(i)            (i*1000)
@@ -20,9 +21,16 @@ const char* ntpServer = "pool.ntp.org";
 time_t getTimeNow();
 
 Adafruit_BME680 bme;
+
+/* Particle sensor datatype */
+Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
+const int particleSensorSleep = 13;
+
+// https://cdn-learn.adafruit.com/downloads/pdf/pmsa003i.pdf
+
 int counter = 0;
 Sensordata data[SAMPLE_SIZE];
-
+PM25_AQI_Data data_particle;
 
 
 void setup() 
@@ -33,14 +41,23 @@ void setup()
   while (!Serial);
   Serial.println(F("BME680 test"));
 
-
+  /* Start particle sensor */
+  pinMode(particleSensorSleep, OUTPUT); 
+  digitalWrite(particleSensorSleep, HIGH);
 
   if (!bme.begin()) {
     Serial.println(F("Could not find a valid BME680 sensor, check wiring!"));
-    while (1);
+    delay(500);
   }
 
-  // Set up oversampling and filter initialization
+
+  // There are 3 options for connectivity!
+  while (!aqi.begin_I2C()) {   
+    Serial.println("Could not find PM 2.5 sensor!");
+    delay(500);
+  }
+
+  /* Set up oversampling and filter initialization */
   bme.setTemperatureOversampling(BME680_OS_8X);
   bme.setHumidityOversampling(BME680_OS_2X);
   bme.setPressureOversampling(BME680_OS_4X);
@@ -54,6 +71,13 @@ void setup()
 
 void loop() 
 {
+  Serial.printf("\r\nafter sleep - digital read: ");
+  Serial.print(digitalRead(particleSensorSleep));
+  /* Start particle sensor */
+  digitalWrite(particleSensorSleep, HIGH);
+  /* 30 sec delay to make the reading properly */
+  delay(UNIT_DOWN(30));
+
   if (counter == 0)
   {
     /* Get time stamp for current reading */
@@ -70,11 +94,42 @@ void loop()
   }
 
   /* Read sensor data */
-  while (! bme.performReading()) 
+  while (!bme.performReading()) 
   {
     Serial.println("Failed to perform reading :(");
-    delay(1000);
+    delay(500);
   }
+
+  while (!aqi.read(&data_particle)) {
+    Serial.println("Could not read from AQI");
+    delay(500);  // try again in a bit!
+  }
+
+  /* Put particle sensor to sleep */
+  digitalWrite(particleSensorSleep, LOW);
+  Serial.println("AQI reading success");
+
+  Serial.println();
+  Serial.println(F("---------------------------------------"));
+  Serial.println(F("Concentration Units (standard)"));
+  Serial.println(F("---------------------------------------"));
+  Serial.print(F("PM 1.0: ")); Serial.print(data_particle.pm10_standard);
+  Serial.print(F("\t\tPM 2.5: ")); Serial.print(data_particle.pm25_standard);
+  Serial.print(F("\t\tPM 10: ")); Serial.println(data_particle.pm100_standard);
+  Serial.println(F("Concentration Units (environmental)"));
+  Serial.println(F("---------------------------------------"));
+  Serial.print(F("PM 1.0: ")); Serial.print(data_particle.pm10_env);
+  Serial.print(F("\t\tPM 2.5: ")); Serial.print(data_particle.pm25_env);
+  Serial.print(F("\t\tPM 10: ")); Serial.println(data_particle.pm100_env);
+  Serial.println(F("---------------------------------------"));
+  Serial.print(F("Particles > 0.3um / 0.1L air:")); Serial.println(data_particle.particles_03um);
+  Serial.print(F("Particles > 0.5um / 0.1L air:")); Serial.println(data_particle.particles_05um);
+  Serial.print(F("Particles > 1.0um / 0.1L air:")); Serial.println(data_particle.particles_10um);
+  Serial.print(F("Particles > 2.5um / 0.1L air:")); Serial.println(data_particle.particles_25um);
+  Serial.print(F("Particles > 5.0um / 0.1L air:")); Serial.println(data_particle.particles_50um);
+  Serial.print(F("Particles > 10 um / 0.1L air:")); Serial.println(data_particle.particles_100um);
+  Serial.println(F("---------------------------------------"));
+  
 
   /* Update data to send */
   data[counter].setTemperature(bme.temperature);
@@ -86,7 +141,8 @@ void loop()
 
 
   counter++;
-
+  Serial.printf("\r\npre sleep - digital read: ");
+  Serial.print(digitalRead(particleSensorSleep));
   /* When we have reached predefined amount of samples, push it to the AWS server */
   if (counter > SAMPLE_SIZE)
   {
