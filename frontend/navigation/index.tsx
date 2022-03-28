@@ -151,9 +151,10 @@ function NotificationsStack() {
             <Stack.Screen
                 name="Room"
                 component={Room}
-                options={{
-                    header: (props) => <Header type={HeaderType.Stack} headerProps={props} />
-                }}
+                options={({ route }) => ({
+                    header: (props) => <Header type={HeaderType.Stack} headerProps={props} />,
+                    title: route.params.room.roomName
+                })}
             />
         </Stack.Navigator>
     );
@@ -184,10 +185,10 @@ function RoomsStack() {
             <Stack.Screen
                 name="Room"
                 component={Room}
-                options={{
-                    title: ' ',
-                    header: (props) => <Header type={HeaderType.Stack} headerProps={props} />
-                }}
+                options={({ route }) => ({
+                    header: (props) => <Header type={HeaderType.Stack} headerProps={props} />,
+                    title: route.params.room.roomName
+                })}
             />
             <Stack.Screen
                 name="AddRoom"

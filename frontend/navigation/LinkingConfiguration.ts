@@ -21,24 +21,14 @@ const linking: LinkingOptions<RootStackParamList> = {
                         initialRouteName: 'Notifications',
                         screens: {
                             Notifications: 'notifications',
-                            Room: {
-                                path: 'room/:roomId',
-                                parse: {
-                                    roomId: Number
-                                }
-                            }
+                            Room: 'room'
                         }
                     },
                     RoomsStack: {
                         initialRouteName: 'Rooms',
                         screens: {
                             Rooms: 'rooms',
-                            Room: {
-                                path: 'room/:roomId',
-                                parse: {
-                                    roomId: Number
-                                }
-                            },
+                            Room: 'room',
                             AddRoom: 'addrooms'
                         }
                     },

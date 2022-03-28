@@ -1,70 +1,63 @@
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import styled, { useTheme } from 'styled-components/native';
+import { useTheme } from 'styled-components/native';
 import { measurements } from '../../constants';
 import useLoadable from '../../hooks/useLoadable';
-import { currentMeasurementState, currentNotificationState } from '../../state/room';
+import {
+    currentMeasurementState,
+    currentNotificationsState,
+    currentRoomDevicesState
+} from '../../state/room';
 import { Notification as INotification, NotificationType } from '../../state/types';
-import Card from '../common/Card';
-import { Body2 } from '../common/Text';
+import IconCard from '../common/IconCard';
 import { ExclamationIcon } from '../icons';
-
-const NotificationCardContent = styled.View({
-    flexDirection: 'row'
-});
-
-const NotificationText = styled(Body2)`
-    ${{
-        alignSelf: 'center'
-    }}
-`;
 
 export default function Notification() {
     const theme = useTheme();
 
     const currentMeasurement = useRecoilValue(currentMeasurementState);
 
-    const { data: notification, loading } = useLoadable(currentNotificationState);
+    const { data: currentRoomDevices } = useLoadable(currentRoomDevicesState);
+    const { data: notifications, loading: notificationsLoading } =
+        useLoadable(currentNotificationsState);
 
-    const [persistentNotification, setPersistentNotification] = useState<
-        INotification | undefined
+    const [persistentNotifications, setPersistentNotifications] = useState<
+        INotification[] | undefined
     >();
 
     useEffect(() => {
-        if (!loading && notification != persistentNotification) {
-            setPersistentNotification(notification);
+        if (!notificationsLoading && notifications != undefined) {
+            setPersistentNotifications(notifications);
         }
-    }, [notification, loading]);
+    }, [notifications, notificationsLoading]);
 
-    if (persistentNotification) {
+    if (currentRoomDevices && persistentNotifications) {
         const measurementInfo = measurements[currentMeasurement];
 
         return (
-            <Card
-                backgroundColor={theme.colors.background.red}
-                padding={16}
-                style={{ marginBottom: 24 }}
-            >
-                <NotificationCardContent>
-                    <ExclamationIcon
-                        width={18}
-                        height={18}
-                        fill={theme.colors.notification}
-                        style={{ marginRight: 8, marginTop: 3 }}
-                    />
-                    <NotificationText flexShrink>
-                        {`${measurementInfo.name} is ${
-                            persistentNotification.type === NotificationType.OverMaxThreshold
+            <>
+                {persistentNotifications.map((notification, index) => (
+                    <IconCard
+                        key={index}
+                        icon={ExclamationIcon}
+                        backgroundColor={theme.colors.background.red}
+                        iconColor={theme.colors.notification}
+                        text={`${
+                            currentRoomDevices?.find(
+                                (device) => device.id == parseInt(notification.deviceId)
+                            )?.deviceName
+                        }: ${measurementInfo.name} is ${
+                            notification.type === NotificationType.OverMaxThreshold
                                 ? 'above'
                                 : 'below'
                         } the recommended threshold of ${
-                            persistentNotification.type === NotificationType.OverMaxThreshold
+                            notification.type === NotificationType.OverMaxThreshold
                                 ? measurementInfo.maxThreshold
                                 : measurementInfo.minThreshold
                         }${measurementInfo.unit}.`}
-                    </NotificationText>
-                </NotificationCardContent>
-            </Card>
+                    />
+                ))}
+            </>
         );
     }
 

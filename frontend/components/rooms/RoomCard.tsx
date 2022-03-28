@@ -2,8 +2,10 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Dimensions, TouchableOpacity } from 'react-native';
+import { useRecoilCallback } from 'recoil';
 import styled, { useTheme } from 'styled-components/native';
 import { RoomsStackParamList } from '../../navigation/types';
+import { currentMeasurementState, roomIdState } from '../../state/room';
 import { Notification, NotificationType, Room } from '../../state/types';
 import Card from '../common/Card';
 import { Body1, Body2 } from '../common/Text';
@@ -59,8 +61,14 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
     // TODO: Get notification status for room
     const notificationsOn: boolean = false;
 
+    const goToRoom = useRecoilCallback(({ set, reset }) => async () => {
+        set(roomIdState, item.id);
+        reset(currentMeasurementState);
+        navigation.navigate('Room', { room: item });
+    });
+
     return (
-        <TouchableOpacity onPress={() => navigation.navigate('Room', { room: item })}>
+        <TouchableOpacity onPress={() => goToRoom()}>
             <Container
                 index={index}
                 backgroundColor={notifications.length > 0 ? theme.colors.background.red : undefined}

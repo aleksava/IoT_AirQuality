@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { atom, selector } from 'recoil';
+import { atom, atomFamily, selector, selectorFamily, waitForAll } from 'recoil';
 import {
     Measurement,
     NotificationType,
@@ -10,6 +10,7 @@ import {
     Notification
 } from './types';
 import { measurements } from '../constants';
+import { roomsState } from './rooms';
 
 export const roomIdState = atom<number | undefined>({
     key: 'roomId',
@@ -21,73 +22,157 @@ export const currentMeasurementState = atom<Measurement>({
     default: Measurement.Temperature
 });
 
-export const roomDevicesState = selector<Device[]>({
-    key: 'roomDevices',
-    get: async ({ get }) => {
-        const roomId = get(roomIdState);
-
-        const devices = await axios
-            .get<Device[]>(`${process.env.API_URL}/devices/get_for_room/${roomId}`, {
-                headers: {
-                    Authorization: `Bearer ${process.env.BEARER_TOKEN}`
-                }
-            })
-            .then((response) => {
-                return response;
-            })
-            .catch((error) => {
-                console.log(error);
-            });
-
-        return devices && devices.data ? devices.data : [];
-    }
-});
-
 export const lookbackState = atom<Lookback>({
     key: 'lookback',
     default: 1
 });
 
-export const dataPointsState = selector<DataPoint[]>({
-    key: 'dataPoints',
+export const devicesState = selector<Device[]>({
+    key: 'devices',
     get: async ({ get }) => {
-        const roomId = get(roomIdState);
-        const lookback = get(lookbackState);
+        const rooms = get(roomsState);
 
-        const deviceData = await axios
-            .get<DeviceData[]>(
-                `${process.env.API_URL}/device_data/get_raw/2?lookback_start=${lookback}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${process.env.BEARER_TOKEN}`
-                    }
-                }
-            )
-            .then((response) => {
-                return response;
+        const devices = await Promise.all(
+            rooms.map(async (room) => {
+                const roomDevices = await axios
+                    .get<Device[]>(`${process.env.API_URL}/devices/get_for_room/${room.id}`, {
+                        headers: {
+                            Authorization: `Bearer ${process.env.BEARER_TOKEN}`
+                        }
+                    })
+                    .then((response) => {
+                        return response;
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
+                return roomDevices && roomDevices.data ? roomDevices.data : [];
             })
-            .catch((error) => {
-                console.log(error);
-            });
+        );
 
-        return deviceData && deviceData.data[0] ? deviceData.data[0].deviceDataPoints : [];
+        return devices.flat();
     }
 });
 
-export const dataPointsCurrentMeasurementState = selector<DataPoint[]>({
+export const roomDevicesState = selectorFamily<Device[], number | undefined>({
+    key: 'roomDevices',
+    get:
+        (roomId) =>
+        async ({ get }) => {
+            const devices = get(devicesState);
+            if (roomId) {
+                return devices.filter((device) => device.roomId == roomId);
+            }
+
+            return [];
+        }
+});
+
+export const currentRoomDevicesState = selector<Device[]>({
+    key: 'currentRoomDevices',
+    get: async ({ get }) => {
+        const roomId = get(roomIdState);
+
+        return get(roomDevicesState(roomId));
+    }
+});
+
+/**
+ * Uses roomId as lookup to get a list of deviceIds that are visible
+ * All devices in a room are visible by default
+ */
+export const visibleDevicesState = atomFamily<number[], number | undefined>({
+    key: 'visibleDevices',
+    default: selectorFamily<number[], number | undefined>({
+        key: 'visibleDevicesDefault',
+        get:
+            (roomId) =>
+            async ({ get }) => {
+                return get(roomDevicesState(roomId)).map((device) => device.id);
+            }
+    })
+});
+
+export const currentRoomVisibleDevicesState = selector<number[]>({
+    key: 'currentRoomVisibleDevices',
+    get: ({ get }) => {
+        const roomId = get(roomIdState);
+
+        return visibleDevicesState(roomId);
+    },
+    set: ({ set, get }, newValue) => {
+        const roomId = get(roomIdState);
+
+        set(visibleDevicesState(roomId), newValue);
+    }
+});
+
+interface DataPoints {
+    [deviceId: number]: DataPoint[];
+}
+
+export const deviceDataPointsState = selectorFamily<DataPoint[], number>({
+    key: 'deviceDataPoints',
+    get:
+        (deviceId) =>
+        async ({ get }) => {
+            const lookback = get(lookbackState);
+
+            const data = await axios
+                .get<DeviceData[]>(
+                    `${process.env.API_URL}/device_data/get_raw/${deviceId}?lookback_start=${lookback}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${process.env.BEARER_TOKEN}`
+                        }
+                    }
+                )
+                .then((response) => {
+                    return response;
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+
+            return data && data.data[0] ? data.data[0].deviceDataPoints : [];
+        }
+});
+
+export const dataPointsState = selector<DataPoints>({
+    key: 'dataPoints',
+    get: async ({ get }) => {
+        const roomDevices = get(currentRoomDevicesState);
+
+        return get<DataPoints>(
+            waitForAll(
+                roomDevices.reduce(
+                    (acc, roomDevice) => ({
+                        ...acc,
+                        [roomDevice.id]: deviceDataPointsState(roomDevice.id)
+                    }),
+                    {}
+                )
+            )
+        );
+    }
+});
+
+export const dataPointsCurrentMeasurementState = selector<DataPoints>({
     key: 'dataPointsCurrentMeasurement',
     get: ({ get }) => {
         const dataPoints = get(dataPointsState);
         const currentMeasurement = get(currentMeasurementState);
-        return dataPoints.filter((dataPoint) => dataPoint.field == currentMeasurement);
-    }
-});
 
-export const dataPointsValuesState = selector<number[]>({
-    key: 'dataPointsValues',
-    get: ({ get }) => {
-        const dataPoints = get(dataPointsCurrentMeasurementState);
-        return dataPoints.map((dataPoint) => dataPoint.value);
+        return Object.keys(dataPoints).reduce(
+            (acc, deviceId) => ({
+                ...acc,
+                [deviceId]: dataPoints[parseInt(deviceId)].filter(
+                    (dataPoint) => dataPoint.field == currentMeasurement
+                )
+            }),
+            {}
+        );
     }
 });
 
@@ -96,9 +181,24 @@ export const currentValueState = selector<DataPoint | undefined>({
     get: async ({ get }) => {
         const dataPoints = get(dataPointsCurrentMeasurementState);
 
-        if (dataPoints.length > 0) {
-            return dataPoints[dataPoints.length - 1];
+        // TODO: Compute currentValue not only from first device
+        const values = dataPoints[parseInt(Object.keys(dataPoints)[0])];
+
+        if (values.length > 0) {
+            return values[values.length - 1];
         }
+    }
+});
+
+export const dataPointsValuesState = selector<number[]>({
+    key: 'dataPointsValues',
+    get: ({ get }) => {
+        const dataPoints = get(dataPointsCurrentMeasurementState);
+        return Object.values(dataPoints)
+            .map((deviceDataPoints: DataPoint[]) =>
+                deviceDataPoints.map((deviceDataPoint) => deviceDataPoint.value)
+            )
+            .flat();
     }
 });
 
@@ -146,45 +246,51 @@ export const notificationsState = selector<Notification[]>({
         const twoHoursAgo = Date.now() - 1000 * 60 * 60 * 2;
 
         Object.entries(measurements).forEach(([key, measurement]) => {
-            const filteredDataPoints = dataPoints.filter((d) => d.field == key);
+            Object.entries(dataPoints).forEach(
+                ([deviceId, deviceDataPoints]: [string, DataPoint[]]) => {
+                    const filteredDataPoints = deviceDataPoints.filter((d) => d.field == key);
 
-            if (filteredDataPoints.length > 0) {
-                const newestDataPoint = filteredDataPoints[filteredDataPoints.length - 1];
-                const newestDataPointDate = new Date(newestDataPoint.timestamp);
+                    if (filteredDataPoints.length > 0) {
+                        const newestDataPoint = filteredDataPoints[filteredDataPoints.length - 1];
+                        const newestDataPointDate = new Date(newestDataPoint.timestamp);
 
-                // Add notification if newest data point timestamp is within the last two hours
-                if (newestDataPointDate.getTime() > twoHoursAgo) {
-                    if (
-                        measurement.maxThreshold &&
-                        newestDataPoint.value > measurement.maxThreshold
-                    ) {
-                        notifications.push({
-                            measurement: key as Measurement,
-                            type: NotificationType.OverMaxThreshold
-                        });
-                    } else if (
-                        measurement.minThreshold &&
-                        newestDataPoint.value < measurement.minThreshold
-                    ) {
-                        notifications.push({
-                            measurement: key as Measurement,
-                            type: NotificationType.UnderMinThreshold
-                        });
+                        // Add notification if newest data point timestamp is within the last two hours
+                        if (newestDataPointDate.getTime() > twoHoursAgo) {
+                            if (
+                                measurement.maxThreshold &&
+                                newestDataPoint.value > measurement.maxThreshold
+                            ) {
+                                notifications.push({
+                                    measurement: key as Measurement,
+                                    type: NotificationType.OverMaxThreshold,
+                                    deviceId: deviceId
+                                });
+                            } else if (
+                                measurement.minThreshold &&
+                                newestDataPoint.value < measurement.minThreshold
+                            ) {
+                                notifications.push({
+                                    measurement: key as Measurement,
+                                    type: NotificationType.UnderMinThreshold,
+                                    deviceId: deviceId
+                                });
+                            }
+                        }
                     }
                 }
-            }
+            );
         });
 
         return notifications;
     }
 });
 
-export const currentNotificationState = selector<Notification | undefined>({
+export const currentNotificationsState = selector<Notification[] | undefined>({
     key: 'currentNotificationState',
     get: ({ get }) => {
         const notifications = get(notificationsState);
         const currentMeasurement = get(currentMeasurementState);
 
-        return notifications.find((n) => n.measurement === currentMeasurement);
+        return notifications.filter((n) => n.measurement === currentMeasurement);
     }
 });

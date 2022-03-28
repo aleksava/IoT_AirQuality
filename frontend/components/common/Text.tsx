@@ -65,9 +65,9 @@ export const NavigationLabel = styled(Text)`
     }}
 `;
 
-export const ChartLabel = styled(Text)`
+export const ChartLegend = styled(Text)`
     ${{
-        fontSize: '10px'
+        fontSize: '12px'
     }}
 `;
 

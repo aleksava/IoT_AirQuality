@@ -27,6 +27,7 @@ export interface DeviceData {
 export interface Notification {
     measurement: Measurement;
     type: NotificationType;
+    deviceId: string;
 }
 
 export enum Measurement {

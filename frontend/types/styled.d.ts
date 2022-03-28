@@ -13,12 +13,14 @@ declare module 'styled-components' {
                 white: string;
                 gray: string;
                 red: string;
+                blue: string;
             };
             border: string;
             notification: string;
             chart: {
                 gridLine: string;
                 label: string;
+                line: string[];
             };
         };
         borderRadius: string;

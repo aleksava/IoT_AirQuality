@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, RefreshControl } from 'react-native';
 import { useRecoilRefresher_UNSTABLE, useRecoilValue } from 'recoil';
 import styled, { useTheme } from 'styled-components/native';
+import { devicesState } from '../../state/room';
 import { roomsState } from '../../state/rooms';
 import { Room } from '../../state/types';
 import { Body1 } from '../common/Text';
@@ -18,6 +19,9 @@ export default function RoomsList() {
 
     const rooms = useRecoilValue<Room[]>(roomsState);
     const refreshRooms = useRecoilRefresher_UNSTABLE(roomsState);
+
+    // Prefetch devices
+    useRecoilValue(devicesState);
 
     const [refreshing, setRefreshing] = useState<boolean>(false);
 

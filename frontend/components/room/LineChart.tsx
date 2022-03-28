@@ -5,13 +5,13 @@ import {
     dataPointsCurrentMeasurementState,
     lookbackState,
     yAxisMaxValueState,
-    yAxisMinValueState
+    yAxisMinValueState,
+    currentRoomVisibleDevicesState
 } from '../../state/room';
 import { Dimensions } from 'react-native';
-import { VictoryArea, VictoryAxis, VictoryChart, VictoryLine } from 'victory-native';
+import { VictoryAxis, VictoryChart, VictoryLine } from 'victory-native';
 import { processFontFamily } from 'expo-font';
 import { measurements } from '../../constants';
-import { Defs, LinearGradient, Stop } from 'react-native-svg';
 import { useMemo } from 'react';
 
 const screenWidth = Dimensions.get('window').width;
@@ -22,7 +22,10 @@ export default function LineChart() {
 
     const currentMeasurement = useRecoilValue(currentMeasurementState);
     const measurementInfo = measurements[currentMeasurement];
+
     const dataPoints = useRecoilValue(dataPointsCurrentMeasurementState);
+
+    const visibleDevices = useRecoilValue(currentRoomVisibleDevicesState);
 
     const yAxisMaxValue = useRecoilValue(yAxisMaxValueState);
     const yAxisMinValue = useRecoilValue(yAxisMinValueState);
@@ -74,27 +77,27 @@ export default function LineChart() {
                 }}
             />
 
-            <Defs>
-                <LinearGradient id="gradientStroke" x2="0%" y2="100%">
-                    <Stop offset="0%" stopColor={theme.colors.primary} stopOpacity={0.25} />
-                    <Stop offset="100%" stopColor={theme.colors.primary} stopOpacity={0} />
-                </LinearGradient>
-            </Defs>
-
-            <VictoryArea
-                style={{
-                    data: {
-                        fill: 'url(#gradientStroke)',
-                        stroke: theme.colors.primary,
-                        strokeWidth: 2
-                    }
-                }}
-                data={dataPoints}
-                x="timestamp"
-                y="value"
-                interpolation="monotoneX"
-                domain={{ x: [lookbackDate, now] }}
-            />
+            {Object.entries(dataPoints).reduce((lines, [deviceId, deviceDataPoints], index) => {
+                if (visibleDevices.includes(parseInt(deviceId))) {
+                    lines.push(
+                        <VictoryLine
+                            key={index}
+                            style={{
+                                data: {
+                                    stroke: theme.colors.chart.line[index],
+                                    strokeWidth: 2
+                                }
+                            }}
+                            data={deviceDataPoints}
+                            x="timestamp"
+                            y="value"
+                            interpolation="monotoneX"
+                            domain={{ x: [lookbackDate, now] }}
+                        />
+                    );
+                }
+                return lines;
+            }, [] as JSX.Element[])}
 
             {measurementInfo.minThreshold && (
                 <VictoryLine

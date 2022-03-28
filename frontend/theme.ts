@@ -24,13 +24,15 @@ export const lightTheme: DefaultTheme = {
         background: {
             white: '#FFFFFF',
             gray: '#F4F4F4',
-            red: '#FBEAE5'
+            red: '#FBEAE5',
+            blue: '#E6EFFC'
         },
         border: '#EBEBEB',
         notification: '#E36E6E',
         chart: {
             gridLine: '#F0F2F3',
-            label: '#BABABA'
+            label: '#BABABA',
+            line: ['#527ebe', '#ffa600', '#bc5090']
         }
     },
     borderRadius: '4px',

@@ -6,3 +6,4 @@ export { default as NotificationOffIcon } from './NotificationOff';
 export { default as NotificationIcon } from './Notification';
 export { default as RoomsIcon } from './Rooms';
 export { default as SettingsIcon } from './Settings';
+export { default as InfoIcon } from './Info';

@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
-import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
+import { useEffect, useRef } from 'react';
 import { Subscription } from 'expo-modules-core';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
@@ -8,8 +7,9 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RoomsStackParamList } from '../navigation/types';
 import { roomsState } from '../state/rooms';
-import { Room } from '../state/types';
-import useLoadable from '../hooks/useLoadable';
+import { Measurement, Room } from '../state/types';
+import { useRecoilCallback } from 'recoil';
+import { currentMeasurementState, roomIdState } from '../state/room';
 
 interface PushNotificationData {
     deviceId: number;
@@ -27,8 +27,6 @@ Notifications.setNotificationHandler({
 });
 
 export default function notificationHandler() {
-    const { data: rooms } = useLoadable<Room[]>(roomsState);
-
     const navigation = useNavigation<NativeStackNavigationProp<RoomsStackParamList, 'Rooms'>>();
 
     const responseListener = useRef<Subscription>();
@@ -68,25 +66,20 @@ export default function notificationHandler() {
         return token;
     };
 
-    useEffect(() => {
-        if (rooms) {
-            registerForPushNotifications();
+    const registerNotificationListener = useRecoilCallback(({ snapshot }) => async () => {
+        const rooms = await snapshot.getPromise(roomsState);
 
+        if (rooms) {
             // Listener for interaction with notifications (tap)
             responseListener.current = Notifications.addNotificationResponseReceivedListener(
                 (response) => {
                     const data = response.notification.request.content
                         .data as unknown as PushNotificationData;
 
-                    if (rooms) {
-                        const room = rooms.find((room) => room.id == data.roomId);
+                    const room = rooms.find((r) => r.id == data.roomId);
 
-                        if (room) {
-                            navigation.navigate('Room', {
-                                room: room,
-                                measurement: data.measurement
-                            });
-                        }
+                    if (room) {
+                        goToRoom(room, data.measurement);
                     }
                 }
             );
@@ -97,5 +90,16 @@ export default function notificationHandler() {
                 }
             };
         }
-    }, [rooms]);
+    });
+
+    const goToRoom = useRecoilCallback(({ set }) => async (room: Room, measurement: string) => {
+        set(roomIdState, room.id);
+        set(currentMeasurementState, measurement as Measurement);
+        navigation.navigate('Room', { room: room });
+    });
+
+    useEffect(() => {
+        registerForPushNotifications();
+        registerNotificationListener();
+    }, []);
 }
