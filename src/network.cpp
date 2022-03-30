@@ -90,7 +90,12 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
   Jlabel.add("Temperature");
   Jlabel.add("Pressure");
   Jlabel.add("Humidity");
-  Jlabel.add("Rel Air quality");
+  Jlabel.add("Gas Resistance");	
+  Jlabel.add("Particles 0.3um");
+  Jlabel.add("Particles 0.5um");
+  Jlabel.add("Particles 1.0um");
+  Jlabel.add("Particles 2.5um");
+  Jlabel.add("Particles 10.0um");
 
   /* Add all the measurements */
   Serial.println("Adding elements");
@@ -101,6 +106,11 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
     Jmeasurements[i].add(data[i].getPressure());
     Jmeasurements[i].add(data[i].getHumidity());
     Jmeasurements[i].add(data[i].getIaq());
+    Jmeasurements[i].add(data[i].getParticles03um());
+    Jmeasurements[i].add(data[i].getParticles05um());
+    Jmeasurements[i].add(data[i].getParticles10um());
+    Jmeasurements[i].add(data[i].getParticles25um());
+    Jmeasurements[i].add(data[i].getParticles100um());
 
   }
   Serial.println("Writing data");
