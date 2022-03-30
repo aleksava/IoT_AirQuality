@@ -76,13 +76,13 @@ void disconnectAWS()
 }
 
 
-void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sample_time)
+void publishMessage(Sensordata data[], uint8_t sample_size, uint32_t delta_sample_time)
 {
   StaticJsonDocument<2048> doc;
 
   /* Add first reading time */
-  doc["startMillisUTC"] = data[0].getTime();
-  doc["deltaMillis"] = delta_sample_time;
+  doc["startSecondsUTC"] = data[0].getTime();
+  doc["deltaSeconds"] = delta_sample_time;
 
   /* Add list of measurements labels */
   Serial.println("Adding labels");
@@ -111,7 +111,6 @@ void publishMessage(Sensordata data[], uint8_t sample_size, uint16_t delta_sampl
     Jmeasurements[i].add(data[i].getParticles10um());
     Jmeasurements[i].add(data[i].getParticles25um());
     Jmeasurements[i].add(data[i].getParticles100um());
-
   }
   Serial.println("Writing data");
   size_t memoryUsed = doc.memoryUsage();

@@ -35,7 +35,7 @@ void Sensordata::setIaq(float iaq)
 }
 
 
-void Sensordata::setTime(unsigned long time)
+void Sensordata::setTime(uint32_t time)
 {
   _timestamp = time;
 }
@@ -92,7 +92,7 @@ uint16_t Sensordata::getParticles100um(void)
 
 
 
-unsigned long Sensordata::getTime(void)
+uint32_t Sensordata::getTime(void)
 {
   return _timestamp;
 }

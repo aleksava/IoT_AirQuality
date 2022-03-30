@@ -13,7 +13,7 @@ class Sensordata
     void setHumidity(float humidity);
     void setGas(float gas);
     void setIaq(float iaq);
-    void setTime(unsigned long time);
+    void setTime(uint32_t time);
     void updateParticles(PM25_AQI_Data data_particle);
     float getTemperature(void);
     float getPressure(void);
@@ -25,7 +25,7 @@ class Sensordata
     uint16_t getParticles10um(void);
     uint16_t getParticles25um(void);
     uint16_t getParticles100um(void);
-    unsigned long getTime(void);
+    uint32_t getTime(void);
     
   private:
     float _temperature;
@@ -39,7 +39,7 @@ class Sensordata
     uint16_t _particles_25um;
     uint16_t _particles_100um;
 
-    unsigned long _timestamp;
+    uint32_t _timestamp;
 };
 
 #endif

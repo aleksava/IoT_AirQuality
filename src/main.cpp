@@ -10,11 +10,11 @@
 
 #define SAMPLE_SIZE             4
 #define UNIT_DOWN(i)            (i*1000)
-#define MS_READ_PERIOD          UNIT_DOWN(30)       
+#define S_READ_PERIOD          60       
 #define US_READ_PERIOD          UNIT_DOWN(UNIT_DOWN(30)) // seconds between each sensor reading
 
 
-//#define DEBUG
+#define DEBUG
 
 void sleepState(bool deep);
 
@@ -26,7 +26,7 @@ Adafruit_BME680 bme;
 
 /* Particle sensor datatype */
 Adafruit_PM25AQI aqi = Adafruit_PM25AQI();
-const int particleSensorSleepPin = 13;
+const int particleSensorSleepPin = 32;
 
 // https://cdn-learn.adafruit.com/downloads/pdf/pmsa003i.pdf
 
@@ -140,10 +140,10 @@ void loop()
 
   counter++;
   /* When we have reached predefined amount of samples, push it to the AWS server */
-  if (counter > SAMPLE_SIZE)
+  if (counter >= SAMPLE_SIZE)
   {
     connectAWS();
-    publishMessage(data, SAMPLE_SIZE, MS_READ_PERIOD);
+    publishMessage(data, SAMPLE_SIZE, S_READ_PERIOD);
     counter = 0;
     disconnectAWS();
     sleepState(true);
