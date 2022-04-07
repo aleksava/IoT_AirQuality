@@ -25,11 +25,14 @@ import IconButton from '../components/common/IconButton';
 import SignIn from '../screens/SignIn';
 import SignUp from '../screens/SignUp';
 import notificationHandler from '../utils/notificationHandler';
+import { Host } from 'react-native-portalize';
 
 export default function Navigation() {
     return (
         <NavigationContainer linking={LinkingConfiguration} theme={navigationLightTheme}>
-            <RootNavigator />
+            <Host>
+                <RootNavigator />
+            </Host>
         </NavigationContainer>
     );
 }

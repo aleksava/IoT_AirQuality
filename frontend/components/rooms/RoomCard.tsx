@@ -4,6 +4,7 @@ import React from 'react';
 import { Dimensions, TouchableOpacity } from 'react-native';
 import { useRecoilCallback } from 'recoil';
 import styled, { useTheme } from 'styled-components/native';
+import { useRoomSubcriptionValue } from '../../hooks/useRoomSubscription';
 import { RoomsStackParamList } from '../../navigation/types';
 import { currentMeasurementState, roomIdState } from '../../state/room';
 import { Notification, NotificationType, Room } from '../../state/types';
@@ -58,8 +59,7 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
     // TODO: Get current notifications for room
     const notifications: Notification[] = [];
 
-    // TODO: Get notification status for room
-    const notificationsOn: boolean = false;
+    const roomSubscription = useRoomSubcriptionValue(item.id);
 
     const goToRoom = useRecoilCallback(({ set, reset }) => async () => {
         set(roomIdState, item.id);
@@ -75,7 +75,7 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
             >
                 <TitleContainer>
                     <RoomName numberOfLines={1}>{item.roomName}</RoomName>
-                    {notificationsOn && (
+                    {roomSubscription && (
                         <NotificationIcon
                             width={14}
                             height={14}

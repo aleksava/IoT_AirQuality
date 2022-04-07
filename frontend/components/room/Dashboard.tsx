@@ -12,6 +12,7 @@ import LineChart from './LineChart';
 import LookbackSelect from './LookbackSelect';
 import MeasurementTabs from './MeasurementTabs';
 import Notification from './Notification';
+import PushNotificationsSettings from './PushNotificationsSettings';
 
 const DashboardContainer = styled.View({
     width: '100%',
@@ -58,6 +59,7 @@ export default function Dashboard() {
                             <Legend />
                         </Suspense>
                     </DashboardContainer>
+                    <PushNotificationsSettings />
                 </>
             ) : (
                 <Container>

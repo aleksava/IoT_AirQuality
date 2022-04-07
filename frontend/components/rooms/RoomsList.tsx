@@ -4,6 +4,7 @@ import { useRecoilRefresher_UNSTABLE, useRecoilValue } from 'recoil';
 import styled, { useTheme } from 'styled-components/native';
 import { devicesState } from '../../state/room';
 import { roomsState } from '../../state/rooms';
+import { allSubscriptionsState } from '../../state/subscription';
 import { Room } from '../../state/types';
 import { Body1 } from '../common/Text';
 import { AddIcon } from '../icons';
@@ -20,6 +21,8 @@ export default function RoomsList() {
     const rooms = useRecoilValue<Room[]>(roomsState);
     const refreshRooms = useRecoilRefresher_UNSTABLE(roomsState);
 
+    const refreshRoomSubscriptions = useRecoilRefresher_UNSTABLE(allSubscriptionsState);
+
     // Prefetch devices
     useRecoilValue(devicesState);
 
@@ -27,6 +30,7 @@ export default function RoomsList() {
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
+        refreshRoomSubscriptions();
         refreshRooms();
     }, []);
 

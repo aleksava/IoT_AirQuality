@@ -3,7 +3,6 @@ import { SvgProps } from 'react-native-svg';
 import styled from 'styled-components/native';
 import Card from '../common/Card';
 import { Body2 } from '../common/Text';
-import { InfoIcon } from '../icons';
 
 const CardContent = styled.View({
     flexDirection: 'row'
@@ -20,11 +19,22 @@ interface Props {
     icon: (props: SvgProps) => JSX.Element;
     iconColor: string;
     text: string;
+    marginBottom?: number;
 }
 
-export default function IconCard({ backgroundColor, icon: Icon, iconColor, text }: Props) {
+export default function IconCard({
+    backgroundColor,
+    icon: Icon,
+    iconColor,
+    text,
+    marginBottom
+}: Props) {
     return (
-        <Card backgroundColor={backgroundColor} padding={16} style={{ marginBottom: 24 }}>
+        <Card
+            backgroundColor={backgroundColor}
+            padding={16}
+            style={{ marginBottom: marginBottom || 0 }}
+        >
             <CardContent>
                 <Icon
                     fill={iconColor}

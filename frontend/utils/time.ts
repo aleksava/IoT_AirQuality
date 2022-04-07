@@ -1,4 +1,4 @@
-export default function timeSince(number: number) {
+export function timeSince(number: number) {
     var seconds = Math.floor((new Date().getTime() - new Date(number).getTime()) / 1000);
     var interval = seconds / 31536000;
 
@@ -37,4 +37,12 @@ export default function timeSince(number: number) {
 
     const s = Math.floor(interval);
     return s + (s == 1 ? ' second' : ' seconds');
+}
+
+export function roundToNearestMinute(date = new Date()) {
+    const minutes = 1;
+    const ms = 1000 * 60 * minutes;
+
+    // 👇️ replace Math.round with Math.ceil to always round UP
+    return new Date(Math.round(date.getTime() / ms) * ms);
 }

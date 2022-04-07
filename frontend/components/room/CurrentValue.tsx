@@ -5,7 +5,7 @@ import { measurements } from '../../constants';
 import useLoadable from '../../hooks/useLoadable';
 import { currentMeasurementState, currentValueState } from '../../state/room';
 import { DataPoint } from '../../state/types';
-import timeSince from '../../utils/timeSince';
+import { timeSince } from '../../utils/time';
 import { Heading1, Subheading2 } from '../common/Text';
 
 export default function CurrentValue() {

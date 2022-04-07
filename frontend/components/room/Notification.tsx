@@ -39,6 +39,7 @@ export default function Notification() {
                 {persistentNotifications.map((notification, index) => (
                     <IconCard
                         key={index}
+                        marginBottom={24}
                         icon={ExclamationIcon}
                         backgroundColor={theme.colors.background.red}
                         iconColor={theme.colors.notification}
