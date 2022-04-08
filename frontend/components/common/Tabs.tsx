@@ -17,9 +17,9 @@ const TabTitle = styled.View({
 
 const Underline = styled.View((props) => ({
     width: '100%',
-    height: '2px',
+    height: 1.5,
     backgroundColor: props.theme.colors.text.main,
-    borderRadius: '2px',
+    borderRadius: '1px',
     position: 'absolute',
     bottom: '0px',
     left: '8px'

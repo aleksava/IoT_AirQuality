@@ -31,8 +31,8 @@ const InputContainer = styled.View({
 const Input = styled.TouchableOpacity<{ active?: boolean }>((props) => ({
     borderBottomWidth: 1,
     borderBottomColor: props.active
-        ? props.theme.colors.text.main
-        : props.theme.colors.neutrals.gray3,
+        ? props.theme.colors.neutrals.gray3
+        : props.theme.colors.neutrals.gray2,
     color: props.theme.colors.text.main,
     paddingTop: 8,
     paddingBottom: 8,

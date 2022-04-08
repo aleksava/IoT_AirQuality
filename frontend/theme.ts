@@ -29,7 +29,7 @@ export const lightTheme: DefaultTheme = {
             black: '#000000',
             gray4: '#676767', // Subtitle
             gray3: '#BABABA', // Label
-            gray2: '#EBEBEB', // Border, loading indicator
+            gray2: '#E1E1E1', // Border, loading indicator
             gray1: '#F4F4F4', // Background, grid line
             white: '#FFFFFF'
         },

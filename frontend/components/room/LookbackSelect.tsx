@@ -26,24 +26,28 @@ export default function LookbackSelect() {
                     alignSelf: 'flex-end'
                 },
                 inputIOS: {
-                    color: theme.colors.text.subtitle,
+                    color: theme.colors.text.main,
                     fontFamily: 'notosans-regular',
                     paddingRight: 24,
-                    fontSize: 14,
+                    fontSize: 12,
                     paddingTop: 8,
                     paddingBottom: 8,
                     borderBottomWidth: 1,
-                    borderBottomColor: theme.colors.neutrals.gray3
+                    borderBottomColor: open
+                        ? theme.colors.neutrals.gray3
+                        : theme.colors.neutrals.gray2
                 },
                 inputAndroid: {
                     color: theme.colors.text.main,
                     fontFamily: 'notosans-regular',
                     paddingRight: 24,
-                    fontSize: 14,
+                    fontSize: 12,
                     paddingTop: 8,
                     paddingBottom: 8,
                     borderBottomWidth: 1,
-                    borderBottomColor: theme.colors.neutrals.gray3
+                    borderBottomColor: open
+                        ? theme.colors.neutrals.gray3
+                        : theme.colors.neutrals.gray2
                 },
                 iconContainer: {
                     height: '100%',
@@ -61,11 +65,7 @@ export default function LookbackSelect() {
                 { label: '1 month', value: 720 }
             ]}
             Icon={() => (
-                <ArrowSmallDownIcon
-                    fill={open ? theme.colors.primary.main : theme.colors.neutrals.gray4}
-                    width={16}
-                    height={16}
-                />
+                <ArrowSmallDownIcon fill={theme.colors.neutrals.gray4} width={16} height={16} />
             )}
         />
     );
