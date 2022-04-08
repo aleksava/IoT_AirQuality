@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import RNPickerSelect from 'react-native-picker-select';
 import { useRecoilState } from 'recoil';
 import { useTheme } from 'styled-components/native';
@@ -7,45 +8,44 @@ import { ArrowSmallDownIcon } from '../icons';
 export default function LookbackSelect() {
     const theme = useTheme();
 
+    const [open, setOpen] = useState<boolean>(false);
     const [lookback, setLookback] = useRecoilState(lookbackState);
 
     return (
         <RNPickerSelect
+            onOpen={() => setOpen(true)}
+            onClose={() => setOpen(false)}
             onValueChange={(value) => setLookback(value)}
             value={lookback}
             placeholder={{}}
             style={{
                 inputIOSContainer: {
-                    minWidth: 100,
                     alignSelf: 'flex-end'
                 },
                 inputAndroidContainer: {
                     alignSelf: 'flex-end'
                 },
                 inputIOS: {
-                    backgroundColor: theme.colors.background.gray,
-                    color: theme.colors.text.main,
+                    color: theme.colors.text.subtitle,
                     fontFamily: 'notosans-regular',
-                    paddingRight: 30,
-                    fontSize: 12,
+                    paddingRight: 24,
+                    fontSize: 14,
                     paddingTop: 8,
                     paddingBottom: 8,
-                    paddingLeft: 8,
-                    borderRadius: 4
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.colors.neutrals.gray3
                 },
                 inputAndroid: {
-                    backgroundColor: theme.colors.background.gray,
                     color: theme.colors.text.main,
                     fontFamily: 'notosans-regular',
-                    paddingRight: 30,
-                    fontSize: 12,
+                    paddingRight: 24,
+                    fontSize: 14,
                     paddingTop: 8,
                     paddingBottom: 8,
-                    paddingLeft: 8,
-                    borderRadius: 4
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.colors.neutrals.gray3
                 },
                 iconContainer: {
-                    right: 8,
                     height: '100%',
                     justifyContent: 'center'
                 }
@@ -60,7 +60,13 @@ export default function LookbackSelect() {
                 { label: '2 weeks', value: 336 },
                 { label: '1 month', value: 720 }
             ]}
-            Icon={() => <ArrowSmallDownIcon fill={theme.colors.text.main} width={16} height={16} />}
+            Icon={() => (
+                <ArrowSmallDownIcon
+                    fill={open ? theme.colors.primary.main : theme.colors.neutrals.gray4}
+                    width={16}
+                    height={16}
+                />
+            )}
         />
     );
 }

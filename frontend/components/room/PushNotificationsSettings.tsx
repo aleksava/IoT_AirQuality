@@ -28,11 +28,16 @@ const InputContainer = styled.View({
     marginBottom: 32
 });
 
-const Input = styled.TouchableOpacity((props) => ({
-    backgroundColor: props.theme.colors.background.gray,
+const Input = styled.TouchableOpacity<{ active?: boolean }>((props) => ({
+    borderBottomWidth: 1,
+    borderBottomColor: props.active
+        ? props.theme.colors.text.main
+        : props.theme.colors.neutrals.gray3,
     color: props.theme.colors.text.main,
-    padding: 8,
-    borderRadius: 4,
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingLeft: 4,
+    paddingRight: 4,
     alignSelf: 'flex-start'
 }));
 
@@ -250,8 +255,8 @@ export default function PushNotificationsSettings() {
 
                             <Button
                                 onPress={() => resetSubscription()}
-                                backgroundColor={theme.colors.notification}
-                                color={theme.colors.background.white}
+                                backgroundColor={theme.colors.error.main}
+                                color={theme.colors.neutrals.white}
                                 loading={loading}
                                 disabled={loading}
                             >
@@ -262,9 +267,9 @@ export default function PushNotificationsSettings() {
                         <>
                             <IconCard
                                 marginBottom={32}
-                                backgroundColor={theme.colors.background.blue}
+                                backgroundColor={theme.colors.info.background}
                                 icon={InfoIcon}
-                                iconColor={theme.colors.primary}
+                                iconColor={theme.colors.info.main}
                                 text={
                                     'Turn on push notifications for this room by entering a date and time. You will receive notifications until the date and time expire.'
                                 }
@@ -272,6 +277,7 @@ export default function PushNotificationsSettings() {
 
                             <InputContainer>
                                 <Input
+                                    active={mode === 'date'}
                                     disabled={loading}
                                     onPress={() =>
                                         setMode((prevValue) =>
@@ -281,13 +287,16 @@ export default function PushNotificationsSettings() {
                                     style={{ marginRight: 8 }}
                                 >
                                     <Body1
-                                        color={mode == 'date' ? theme.colors.primary : undefined}
+                                        color={
+                                            mode == 'date' ? theme.colors.primary.main : undefined
+                                        }
                                     >
                                         {dateTime.toLocaleDateString()}
                                     </Body1>
                                 </Input>
 
                                 <Input
+                                    active={mode === 'time'}
                                     disabled={loading}
                                     onPress={() =>
                                         setMode((prevValue) =>
@@ -296,7 +305,9 @@ export default function PushNotificationsSettings() {
                                     }
                                 >
                                     <Body1
-                                        color={mode == 'time' ? theme.colors.primary : undefined}
+                                        color={
+                                            mode == 'time' ? theme.colors.primary.main : undefined
+                                        }
                                     >
                                         {dateTime.toLocaleTimeString([], {
                                             hour: '2-digit',
@@ -309,7 +320,7 @@ export default function PushNotificationsSettings() {
                             {mode != undefined && (
                                 <View
                                     style={{
-                                        borderBottomColor: theme.colors.chart.gridLine,
+                                        borderBottomColor: theme.colors.neutrals.gray2,
                                         borderBottomWidth: 1
                                     }}
                                 />
@@ -339,7 +350,7 @@ export default function PushNotificationsSettings() {
                             {mode != undefined && (
                                 <View
                                     style={{
-                                        borderBottomColor: theme.colors.chart.gridLine,
+                                        borderBottomColor: theme.colors.neutrals.gray2,
                                         borderBottomWidth: 1,
                                         marginBottom: 16
                                     }}
@@ -351,17 +362,17 @@ export default function PushNotificationsSettings() {
                                     <ExclamationIcon
                                         width={12}
                                         height={12}
-                                        fill={theme.colors.notification}
+                                        fill={theme.colors.error.main}
                                         style={{ marginRight: 4 }}
                                     />
-                                    <Body1 color={theme.colors.notification}>{dateTimeError}</Body1>
+                                    <Body1 color={theme.colors.error.main}>{dateTimeError}</Body1>
                                 </Error>
                             )}
 
                             <Button
                                 onPress={updateSubscription}
-                                backgroundColor={theme.colors.primary}
-                                color={theme.colors.background.white}
+                                backgroundColor={theme.colors.primary.main}
+                                color={theme.colors.neutrals.white}
                                 loading={loading}
                                 disabled={loading || dateTimeError !== undefined}
                             >

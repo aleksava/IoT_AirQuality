@@ -47,7 +47,7 @@ const NotificationContainer = styled.View({
 
 const NotificationText = styled(Body2).attrs({ bold: true })`
     ${(props) => ({
-        color: props.theme.colors.notification,
+        color: props.theme.colors.error.main,
         marginLeft: 4
     })}
 `;
@@ -71,7 +71,9 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
         <TouchableOpacity onPress={() => goToRoom()}>
             <Container
                 index={index}
-                backgroundColor={notifications.length > 0 ? theme.colors.background.red : undefined}
+                backgroundColor={
+                    notifications.length > 0 ? theme.colors.error.background : undefined
+                }
             >
                 <TitleContainer>
                     <RoomName numberOfLines={1}>{item.roomName}</RoomName>
@@ -94,7 +96,7 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
                             <ExclamationIcon
                                 width={14}
                                 height={14}
-                                fill={theme.colors.notification}
+                                fill={theme.colors.error.main}
                             />
                             <NotificationText numberOfLines={1} style={{ flexShrink: 1 }}>
                                 {notifications[0].type === NotificationType.OverMaxThreshold

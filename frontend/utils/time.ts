@@ -43,6 +43,5 @@ export function roundToNearestMinute(date = new Date()) {
     const minutes = 1;
     const ms = 1000 * 60 * minutes;
 
-    // 👇️ replace Math.round with Math.ceil to always round UP
     return new Date(Math.round(date.getTime() / ms) * ms);
 }

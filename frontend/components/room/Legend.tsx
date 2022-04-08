@@ -64,7 +64,7 @@ export default function LegendContainer() {
                     activeOpacity={0.3}
                 >
                     <LegendItem visible={visibleDevices.includes(device.id)}>
-                        <Dot fill={theme.colors.chart.line[index]} />
+                        <Dot fill={theme.colors.chart[index]} />
                         <ChartLegend>{device.deviceName}</ChartLegend>
                     </LegendItem>
                 </TouchableOpacity>

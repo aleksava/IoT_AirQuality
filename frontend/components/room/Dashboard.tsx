@@ -51,7 +51,10 @@ export default function Dashboard() {
                         <Suspense
                             fallback={
                                 <ChartPlaceholder>
-                                    <ActivityIndicator size="large" color={theme.colors.border} />
+                                    <ActivityIndicator
+                                        size="large"
+                                        color={theme.colors.neutrals.gray2}
+                                    />
                                 </ChartPlaceholder>
                             }
                         >
@@ -65,8 +68,8 @@ export default function Dashboard() {
                 <Container>
                     <IconCard
                         icon={InfoIcon}
-                        backgroundColor={theme.colors.background.blue}
-                        iconColor={theme.colors.primary}
+                        backgroundColor={theme.colors.info.background}
+                        iconColor={theme.colors.info.main}
                         text={'No devices found for this room.'}
                     />
                 </Container>

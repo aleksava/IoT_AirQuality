@@ -54,12 +54,12 @@ export default function LineChart() {
                 style={{
                     axis: { stroke: 'transparent' },
                     tickLabels: {
-                        fill: theme.colors.chart.label,
+                        fill: theme.colors.neutrals.gray3,
                         fontFamily: processFontFamily('notosans-regular')!,
                         fontSize: '10px'
                     },
                     grid: {
-                        stroke: theme.colors.chart.gridLine,
+                        stroke: theme.colors.neutrals.gray1,
                         strokeWidth: 1,
                         strokeDasharray: 8
                     }
@@ -70,7 +70,7 @@ export default function LineChart() {
                 style={{
                     axis: { stroke: 'transparent' },
                     tickLabels: {
-                        fill: theme.colors.chart.label,
+                        fill: theme.colors.neutrals.gray3,
                         fontFamily: processFontFamily('notosans-regular')!,
                         fontSize: '10px'
                     }
@@ -84,7 +84,7 @@ export default function LineChart() {
                             key={index}
                             style={{
                                 data: {
-                                    stroke: theme.colors.chart.line[index],
+                                    stroke: theme.colors.chart[index],
                                     strokeWidth: 2
                                 }
                             }}
@@ -105,7 +105,7 @@ export default function LineChart() {
                     domain={{ x: [lookbackDate, now] }}
                     style={{
                         data: {
-                            stroke: theme.colors.notification,
+                            stroke: theme.colors.error.main,
                             strokeWidth: 1.5,
                             strokeDasharray: 8,
                             strokeOpacity: 0.5
@@ -119,7 +119,7 @@ export default function LineChart() {
                     domain={{ x: [lookbackDate, now] }}
                     style={{
                         data: {
-                            stroke: theme.colors.notification,
+                            stroke: theme.colors.error.main,
                             strokeWidth: 1.5,
                             strokeDasharray: 8,
                             strokeOpacity: 0.5

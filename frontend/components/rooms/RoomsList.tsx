@@ -59,8 +59,8 @@ export default function RoomsList() {
                     <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
-                        colors={[theme.colors.border]}
-                        tintColor={theme.colors.border}
+                        colors={[theme.colors.neutrals.gray2]}
+                        tintColor={theme.colors.neutrals.gray2}
                     />
                 ) : undefined
             }

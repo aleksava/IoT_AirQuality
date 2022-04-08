@@ -88,7 +88,7 @@ function BottomTabNavigator() {
             screenOptions={{
                 tabBarActiveTintColor: theme.colors.text.main,
                 tabBarStyle: {
-                    backgroundColor: theme.colors.background.gray,
+                    backgroundColor: theme.colors.neutrals.gray1,
                     height: 56
                 },
                 tabBarIconStyle: {

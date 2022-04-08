@@ -11,7 +11,7 @@ export default function Rooms() {
         <Suspense
             fallback={
                 <Container>
-                    <ActivityIndicator size="large" color={theme.colors.border} />
+                    <ActivityIndicator size="large" color={theme.colors.neutrals.gray2} />
                 </Container>
             }
         >

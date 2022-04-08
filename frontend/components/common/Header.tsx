@@ -12,7 +12,7 @@ const Container = styled.View((props) => ({
     flexDirection: 'row',
     width: '100%',
     padding: `${getStatusBarHeight() + 24}px 16px 24px 16px`,
-    backgroundColor: props.theme.colors.background.white
+    backgroundColor: props.theme.colors.neutrals.white
 }));
 
 const TitleContainer = styled.View((props) => ({

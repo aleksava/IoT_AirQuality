@@ -8,7 +8,7 @@ const Card = styled.View<{
 }>((props) => ({
     width: props.width || '100%',
     height: props.height || 'auto',
-    backgroundColor: props.backgroundColor || props.theme.colors.background.gray,
+    backgroundColor: props.backgroundColor || props.theme.colors.neutrals.gray1,
     padding: props.padding || '8px',
     borderRadius: props.theme.borderRadius
 }));

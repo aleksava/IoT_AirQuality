@@ -49,7 +49,7 @@ export function Tab(props: TabProps) {
                         <ExclamationIcon
                             width={14}
                             height={14}
-                            fill={theme.colors.notification}
+                            fill={theme.colors.error.main}
                             style={{ marginLeft: 4 }}
                         />
                     )}

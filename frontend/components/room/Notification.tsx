@@ -41,8 +41,8 @@ export default function Notification() {
                         key={index}
                         marginBottom={24}
                         icon={ExclamationIcon}
-                        backgroundColor={theme.colors.background.red}
-                        iconColor={theme.colors.notification}
+                        backgroundColor={theme.colors.error.background}
+                        iconColor={theme.colors.error.main}
                         text={`${
                             currentRoomDevices?.find(
                                 (device) => device.id == parseInt(notification.deviceId)
