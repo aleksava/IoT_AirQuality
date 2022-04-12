@@ -1,16 +1,8 @@
-import axios from 'axios';
 import { atom, atomFamily, selector, selectorFamily, waitForAll } from 'recoil';
-import {
-    Measurement,
-    NotificationType,
-    Lookback,
-    DataPoint,
-    DeviceData,
-    Device,
-    Notification
-} from './types';
+import { Measurement, NotificationType, Lookback, DataPoint, Device, Notification } from './types';
 import { measurements } from '../constants';
 import { roomsState } from './rooms';
+import { DevicesService } from '../api/devices';
 
 export const roomIdState = atom<number | undefined>({
     key: 'roomId',
@@ -34,20 +26,9 @@ export const devicesState = selector<Device[]>({
 
         const devices = await Promise.all(
             rooms.map(async (room) => {
-                const roomDevices = await axios
-                    .get<Device[]>(`${process.env.API_URL}/devices/get_for_room/${room.id}`, {
-                        headers: {
-                            Authorization: `Bearer ${process.env.BEARER_TOKEN}`
-                        }
-                    })
-                    .then((response) => {
-                        return response;
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+                const roomDevices = await DevicesService.getDevicesInRoom(room.id);
 
-                return roomDevices && roomDevices.data ? roomDevices.data : [];
+                return roomDevices || [];
             })
         );
 
@@ -119,23 +100,9 @@ export const deviceDataPointsState = selectorFamily<DataPoint[], number>({
         async ({ get }) => {
             const lookback = get(lookbackState);
 
-            const data = await axios
-                .get<DeviceData[]>(
-                    `${process.env.API_URL}/device_data/get_raw/${deviceId}?lookback_start=${lookback}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${process.env.BEARER_TOKEN}`
-                        }
-                    }
-                )
-                .then((response) => {
-                    return response;
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+            const deviceData = await DevicesService.getDeviceData(deviceId, lookback);
 
-            return data && data.data[0] ? data.data[0].deviceDataPoints : [];
+            return deviceData[0] ? deviceData[0].deviceDataPoints : [];
         }
 });
 

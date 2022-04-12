@@ -16,10 +16,9 @@ import { ExclamationIcon, InfoIcon, NotificationIcon, NotificationOffIcon } from
 import DateTimePicker, { Event } from '@react-native-community/datetimepicker';
 import { View } from 'react-native';
 import Button from '../common/Button';
-import { getExpoPushTokenAsync } from 'expo-notifications';
-import axios from 'axios';
 import { roundToNearestMinute } from '../../utils/time';
 import { useRoomSubcriptionState } from '../../hooks/useRoomSubscription';
+import { NotificationsService } from '../../api/notifications';
 
 const InputContainer = styled.View({
     flexDirection: 'row',
@@ -47,12 +46,6 @@ const Error = styled.View({
     alignItems: 'center',
     marginBottom: 16
 });
-
-interface SubscriptionResponse {
-    baseUser_room_composite: any;
-    notificationToken: string;
-    expiresTimestamp: number;
-}
 
 export default function PushNotificationsSettings() {
     const theme = useTheme();
@@ -125,68 +118,38 @@ export default function PushNotificationsSettings() {
     };
 
     const updateSubscription = async () => {
-        if (dateTimeError === undefined) {
+        if (dateTimeError === undefined && roomId) {
             setLoading(true);
-
-            const pushNotificationToken = (await getExpoPushTokenAsync()).data;
 
             var diff = Math.abs(new Date().getTime() - dateTime.getTime());
             var minutes = Math.floor(diff / 1000 / 60);
 
             // Call API to register subscription
-            await axios
-                .post<SubscriptionResponse>(
-                    `${process.env.API_URL}/notifications/subscribe_for_room`,
-                    {
-                        roomId: roomId,
-                        token: pushNotificationToken,
-                        lastForMinutes: minutes
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${process.env.BEARER_TOKEN}`
-                        }
-                    }
-                )
+            await NotificationsService.subscribeForRoom(roomId, minutes)
                 .then(() => {
                     setRoomSubscription(dateTime.getTime());
                     setLoading(false);
                 })
-                .catch((error) => {
-                    console.log(error);
+                .catch(() => {
                     setLoading(false);
                 });
         }
     };
 
     const resetSubscription = async () => {
-        setLoading(true);
-        // Subscription is reset before expiration, remove from backend and local storage
-        const pushNotificationToken = (await getExpoPushTokenAsync()).data;
+        if (roomId) {
+            setLoading(true);
 
-        // Call API to reset subscription (set last for minutes to 0)
-        await axios
-            .post<SubscriptionResponse>(
-                `${process.env.API_URL}/notifications/subscribe_for_room`,
-                {
-                    roomId: roomId,
-                    token: pushNotificationToken,
-                    lastForMinutes: 0
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${process.env.BEARER_TOKEN}`
-                    }
-                }
-            )
-            .then(() => {
-                resetRoomSubscription();
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.log(error);
-                setLoading(false);
-            });
+            // Call API to reset subscription (set last for minutes to 0)
+            await NotificationsService.subscribeForRoom(roomId, 0)
+                .then(() => {
+                    resetRoomSubscription();
+                    setLoading(false);
+                })
+                .catch(() => {
+                    setLoading(false);
+                });
+        }
     };
 
     useEffect(() => {
