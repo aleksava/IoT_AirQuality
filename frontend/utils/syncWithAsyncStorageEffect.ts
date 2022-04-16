@@ -1,7 +1,7 @@
 import { AtomEffect } from 'recoil';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const syncStorageEffect: <T>(key: string) => AtomEffect<T> =
+const syncWithAsyncStorageEffect: <T>(key: string) => AtomEffect<T> =
     (key) =>
     ({ setSelf, onSet, trigger }) => {
         // If there's a persisted value - set it on load
@@ -26,4 +26,4 @@ const syncStorageEffect: <T>(key: string) => AtomEffect<T> =
         });
     };
 
-export default syncStorageEffect;
+export default syncWithAsyncStorageEffect;

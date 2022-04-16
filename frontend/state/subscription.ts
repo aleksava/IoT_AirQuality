@@ -1,5 +1,5 @@
 import { atom, DefaultValue, selectorFamily } from 'recoil';
-import syncStorageEffect from '../utils/syncStorageEffect';
+import syncWithAsyncStorageEffect from '../utils/syncWithAsyncStorageEffect';
 
 interface Subscriptions {
     [roomId: number]: number;
@@ -8,7 +8,7 @@ interface Subscriptions {
 export const allSubscriptionsState = atom<Subscriptions>({
     key: 'allSubscriptions',
     default: {},
-    effects: [syncStorageEffect<Subscriptions>('roomSubscriptions')]
+    effects: [syncWithAsyncStorageEffect<Subscriptions>('roomSubscriptions')]
 });
 
 export const roomSubscriptionState = selectorFamily<number | undefined, number | undefined>({
