@@ -14,7 +14,9 @@ import MeasurementTabs from './MeasurementTabs';
 import Notification from './Notification';
 import PushNotificationsSettings from './PushNotificationsSettings';
 
-const DashboardContainer = styled.View({
+const DashboardContainer = styled.ScrollView({
+    flex: 1,
+    height: '100%',
     width: '100%',
     padding: '0 16px 16px 16px'
 });
@@ -38,7 +40,7 @@ export default function Dashboard() {
     const roomDevices = useRecoilValue(currentRoomDevicesState);
 
     return (
-        <View>
+        <View style={{ flex: 1 }}>
             {roomDevices.length > 0 ? (
                 <>
                     <MeasurementTabs />

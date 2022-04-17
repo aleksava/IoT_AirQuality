@@ -60,11 +60,12 @@ export function Tab(props: TabProps) {
     );
 }
 
-const ButtonGroup = styled.ScrollView((props) => ({
+const ButtonGroup = styled.ScrollView({
     display: 'flex',
+    flexGrow: 0,
     flexDirection: 'row',
     marginBottom: 24
-}));
+});
 
 interface TabsProps {
     children: React.ReactNode;
