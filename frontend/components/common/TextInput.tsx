@@ -56,7 +56,10 @@ function TextInput({ inputProps, Icon, style, error }: Props) {
                 />
             </InputContainer>
             {error && (
-                <Body2 style={{ marginLeft: 36, marginTop: 2 }} color={theme.colors.error.main}>
+                <Body2
+                    style={{ marginLeft: Icon ? 36 : 0, marginTop: 2 }}
+                    color={theme.colors.error.main}
+                >
                     {error}
                 </Body2>
             )}
