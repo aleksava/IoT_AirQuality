@@ -10,13 +10,6 @@ const linking: LinkingOptions<RootStackParamList> = {
             SignIn: 'signin',
             Root: {
                 screens: {
-                    NotificationsStack: {
-                        initialRouteName: 'Notifications',
-                        screens: {
-                            Notifications: 'notifications',
-                            Room: 'room'
-                        }
-                    },
                     RoomsStack: {
                         initialRouteName: 'Rooms',
                         screens: {

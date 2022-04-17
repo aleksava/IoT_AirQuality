@@ -20,18 +20,12 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> = Nati
 >;
 
 export type RootTabParamList = {
-    NotificationsStack: NavigatorScreenParams<NotificationsStackParamList>;
     RoomsStack: NavigatorScreenParams<RoomsStackParamList>;
     Settings: undefined;
 };
 
 type RoomParam = {
     room: Room;
-};
-
-export type NotificationsStackParamList = {
-    Notifications: undefined;
-    Room: RoomParam;
 };
 
 export type RoomsStackParamList = {
