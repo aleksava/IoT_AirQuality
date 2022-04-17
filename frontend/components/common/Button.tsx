@@ -10,7 +10,7 @@ const Touchable = styled.TouchableOpacity<{ backgroundColor: string }>((props) =
     paddingLeft: 16,
     paddingRight: 16,
     backgroundColor: props.disabled ? 'rgba(0, 0, 0, 0.12)' : props.backgroundColor,
-    borderRadius: props.theme.borderRadius,
+    borderRadius: 18,
     height: 36
 }));
 

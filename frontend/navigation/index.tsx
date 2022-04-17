@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import {
@@ -23,9 +24,11 @@ import AddRoom from '../screens/AddRoom';
 import { Header, HeaderType } from '../components/common/Header';
 import IconButton from '../components/common/IconButton';
 import SignIn from '../screens/SignIn';
-import SignUp from '../screens/SignUp';
 import notificationHandler from '../utils/notificationHandler';
 import { Host } from 'react-native-portalize';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
+import { authState } from '../state/auth';
+import apiClient from '../api/api';
 
 export default function Navigation() {
     return (
@@ -40,14 +43,41 @@ export default function Navigation() {
 function RootNavigator() {
     const Stack = createNativeStackNavigator<RootStackParamList>();
 
-    notificationHandler();
+    const auth = useRecoilValue(authState);
+    const resetAuth = useResetRecoilState(authState);
 
-    // TODO: Get signed in state
-    const isSignedIn = true;
+    const [apiClientReady, setApiClientReady] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (auth.accessToken) {
+            apiClient.interceptors.request.use((config) => {
+                config.headers!['Authorization'] = 'Bearer ' + auth.accessToken;
+
+                return config;
+            });
+
+            apiClient.interceptors.response.use(
+                (res) => res,
+                (err) => {
+                    if (err.config && err.response && err.response.status === 401) {
+                        resetAuth();
+                    }
+
+                    return err.config;
+                }
+            );
+
+            setApiClientReady(true);
+        } else {
+            setApiClientReady(false);
+        }
+    }, [auth.accessToken]);
+
+    notificationHandler();
 
     return (
         <Stack.Navigator>
-            {isSignedIn ? (
+            {auth.accessToken && apiClientReady ? (
                 <Stack.Screen
                     name="Root"
                     component={BottomTabNavigator}
@@ -59,14 +89,7 @@ function RootNavigator() {
                         name="SignIn"
                         component={SignIn}
                         options={{
-                            title: 'Sign In',
-                            header: (props) => <Header type={HeaderType.Main} headerProps={props} />
-                        }}
-                    />
-                    <Stack.Screen
-                        name="SignUp"
-                        component={SignUp}
-                        options={{
+                            headerShown: false,
                             title: 'Sign In',
                             header: (props) => <Header type={HeaderType.Main} headerProps={props} />
                         }}

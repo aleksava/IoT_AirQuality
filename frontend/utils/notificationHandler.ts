@@ -8,8 +8,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RoomsStackParamList } from '../navigation/types';
 import { roomsState } from '../state/rooms';
 import { Measurement, Room } from '../state/types';
-import { useRecoilCallback } from 'recoil';
+import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { currentMeasurementState, roomIdState } from '../state/room';
+import { authState } from '../state/auth';
 
 interface PushNotificationData {
     deviceId: number;
@@ -30,6 +31,8 @@ export default function notificationHandler() {
     const navigation = useNavigation<NativeStackNavigationProp<RoomsStackParamList, 'Rooms'>>();
 
     const responseListener = useRef<Subscription>();
+
+    const auth = useRecoilValue(authState);
 
     const registerForPushNotifications = async () => {
         let token;
@@ -100,6 +103,11 @@ export default function notificationHandler() {
 
     useEffect(() => {
         registerForPushNotifications();
-        registerNotificationListener();
     }, []);
+
+    useEffect(() => {
+        if (auth.accessToken) {
+            registerNotificationListener();
+        }
+    }, [auth.accessToken]);
 }

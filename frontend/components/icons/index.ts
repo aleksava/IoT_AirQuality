@@ -7,3 +7,5 @@ export { default as NotificationIcon } from './Notification';
 export { default as RoomsIcon } from './Rooms';
 export { default as SettingsIcon } from './Settings';
 export { default as InfoIcon } from './Info';
+export { default as AtIcon } from './At';
+export { default as LockIcon } from './Lock';

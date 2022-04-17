@@ -17,7 +17,7 @@ export const navigationLightTheme: Theme = {
 export const lightTheme: DefaultTheme = {
     colors: {
         primary: {
-            main: '#527EBE',
+            main: '#1976D2',
             background: '#E6EFFC'
         },
         text: {
@@ -28,8 +28,8 @@ export const lightTheme: DefaultTheme = {
         neutrals: {
             black: '#000000',
             gray4: '#676767', // Subtitle
-            gray3: '#BABABA', // Label
-            gray2: '#E1E1E1', // Border, loading indicator
+            gray3: '#7A869A', // Label
+            gray2: '#E1E3E6', // Border, loading indicator
             gray1: '#F4F4F4', // Background, grid line
             white: '#FFFFFF'
         },
