@@ -23,22 +23,21 @@ export const measurements: { [key in Measurement]: IMeasurement } = {
         name: 'Pressure',
         unit: ' hPa',
         decimals: 0,
-        yAxisMaxValue: 0,
-        yAxisMinValue: 100
+        yAxisMinValue: 800,
+        yAxisMaxValue: 1300
     },
-    [Measurement.AirQuality]: {
-        name: 'Air Quality',
-        unit: '',
+    [Measurement.GasResistance]: {
+        name: 'Gas Resistance',
+        unit: ' Ω',
         decimals: 0,
         yAxisMinValue: 0,
-        yAxisMaxValue: 100
+        yAxisMaxValue: 50000
     },
-    [Measurement.CO2]: {
-        name: 'CO2',
-        unit: ' ppb',
+    [Measurement.PM25]: {
+        name: 'PM2.5',
+        unit: ' μg/m³',
         decimals: 0,
-        maxThreshold: 1000,
         yAxisMinValue: 0,
-        yAxisMaxValue: 1100
+        yAxisMaxValue: 20
     }
 };

@@ -34,8 +34,8 @@ export enum Measurement {
     Temperature = 'temperature',
     Humidity = 'humidity',
     Pressure = 'pressure',
-    AirQuality = 'IAQ',
-    CO2 = 'CO2'
+    GasResistance = 'gas resistance',
+    PM25 = 'particles 2.5um'
 }
 
 export enum NotificationType {

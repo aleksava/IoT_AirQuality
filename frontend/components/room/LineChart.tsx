@@ -9,10 +9,11 @@ import {
     currentRoomVisibleDevicesState
 } from '../../state/room';
 import { Dimensions } from 'react-native';
-import { VictoryAxis, VictoryChart, VictoryLine } from 'victory-native';
+import { VictoryArea, VictoryAxis, VictoryChart, VictoryLine } from 'victory-native';
 import { processFontFamily } from 'expo-font';
 import { measurements } from '../../constants';
 import { useMemo } from 'react';
+import { Defs, LinearGradient, Stop } from 'react-native-svg';
 
 const screenWidth = Dimensions.get('window').width;
 const now = new Date();
@@ -44,13 +45,13 @@ export default function LineChart() {
             domain={{ y: [yAxisMinValue, yAxisMaxValue] }}
             width={screenWidth - 32}
             scale={{ x: 'time' }}
-            padding={{ top: 16, right: 16, bottom: 24, left: 50 }}
+            padding={{ top: 16, right: 16, bottom: 24, left: 54 }}
             height={240}
         >
             <VictoryAxis
                 dependentAxis
                 crossAxis={false}
-                tickFormat={(tick) => tick + measurementInfo.unit}
+                tickFormat={(tick) => tick.toFixed(measurementInfo.decimals) + measurementInfo.unit}
                 style={{
                     axis: { stroke: 'transparent' },
                     tickLabels: {
@@ -77,27 +78,54 @@ export default function LineChart() {
                 }}
             />
 
-            {Object.entries(dataPoints).reduce((lines, [deviceId, deviceDataPoints], index) => {
-                if (visibleDevices.includes(parseInt(deviceId))) {
-                    lines.push(
-                        <VictoryLine
-                            key={index}
-                            style={{
-                                data: {
-                                    stroke: theme.colors.chart[index],
-                                    strokeWidth: 2
-                                }
-                            }}
-                            data={deviceDataPoints}
-                            x="timestamp"
-                            y="value"
-                            interpolation="monotoneX"
-                            domain={{ x: [lookbackDate, now] }}
-                        />
-                    );
-                }
-                return lines;
-            }, [] as JSX.Element[])}
+            <Defs>
+                <LinearGradient id="gradientStroke" x2="0%" y2="100%">
+                    <Stop offset="0%" stopColor={theme.colors.chart[0]} stopOpacity={0.25} />
+                    <Stop offset="100%" stopColor={theme.colors.chart[0]} stopOpacity={0} />
+                </LinearGradient>
+            </Defs>
+
+            {Object.keys(dataPoints).length > 1
+                ? Object.entries(dataPoints).reduce(
+                      (lines, [deviceId, deviceDataPoints], index) => {
+                          if (visibleDevices.includes(parseInt(deviceId))) {
+                              lines.push(
+                                  <VictoryLine
+                                      key={index}
+                                      style={{
+                                          data: {
+                                              stroke: theme.colors.chart[index],
+                                              strokeWidth: 2
+                                          }
+                                      }}
+                                      data={deviceDataPoints}
+                                      x="timestamp"
+                                      y="value"
+                                      interpolation="monotoneX"
+                                      domain={{ x: [lookbackDate, now] }}
+                                  />
+                              );
+                          }
+                          return lines;
+                      },
+                      [] as JSX.Element[]
+                  )
+                : visibleDevices.includes(parseInt(Object.keys(dataPoints)[0])) && (
+                      <VictoryArea
+                          style={{
+                              data: {
+                                  fill: 'url(#gradientStroke)',
+                                  stroke: theme.colors.chart[0],
+                                  strokeWidth: 2
+                              }
+                          }}
+                          data={Object.values(dataPoints)[0]}
+                          x="timestamp"
+                          y="value"
+                          interpolation="monotoneX"
+                          domain={{ x: [lookbackDate, now] }}
+                      />
+                  )}
 
             {measurementInfo.minThreshold && (
                 <VictoryLine
