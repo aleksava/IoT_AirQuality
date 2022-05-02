@@ -1,0 +1,22 @@
+{
+  "name": "data-handler-lambda",
+  "version": "0.1.0",
+  "description": "A catchall-project that both runs basic threshold rules and saves data to influxdb",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Pål Meltveit",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/types": "^3.49.0",
+    "@influxdata/influxdb-client": "^1.22.0",
+    "aws-sdk": "^2.1066.0",
+    "expo-server-sdk": "^3.6.0",
+    "pg-format": "^1.0.4",
+    "serverless-postgres": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.16"
+  }
+}
