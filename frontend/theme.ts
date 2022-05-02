@@ -16,18 +16,31 @@ export const navigationLightTheme: Theme = {
 
 export const lightTheme: DefaultTheme = {
     colors: {
-        primary: '#527EBE',
+        primary: {
+            main: '#1976D2',
+            background: '#E6EFFC'
+        },
         text: {
             main: '#374957',
             subtitle: '#676767'
         },
-        background: {
-            white: '#FFFFFF',
-            gray: '#F4F4F4',
-            red: '#FBEAE5'
+        chart: ['#527ebe', '#ffa600', '#bc5090'],
+        neutrals: {
+            black: '#000000',
+            gray4: '#676767', // Subtitle
+            gray3: '#7A869A', // Label
+            gray2: '#E1E3E6', // Border, loading indicator
+            gray1: '#F4F4F4', // Background, grid line
+            white: '#FFFFFF'
         },
-        border: '#EBEBEB',
-        notification: '#E36E6E'
+        error: {
+            main: '#E36E6E',
+            background: '#FBEAE5'
+        },
+        info: {
+            main: '#527EBE',
+            background: '#E6EFFC'
+        }
     },
     borderRadius: '4px',
     transitionDuration: 150

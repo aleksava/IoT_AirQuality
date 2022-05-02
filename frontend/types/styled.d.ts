@@ -1,21 +1,27 @@
 import { Theme } from '@react-navigation/native';
 import 'styled-components';
 
+interface Shades {
+    [key: string]: string;
+}
+
+interface Palette {
+    main: string;
+    background: string;
+}
+
 declare module 'styled-components' {
     export interface DefaultTheme {
         colors: {
-            primary: string;
+            primary: Palette;
             text: {
                 main: string;
                 subtitle: string;
             };
-            background: {
-                white: string;
-                gray: string;
-                red: string;
-            };
-            border: string;
-            notification: string;
+            chart: string[];
+            neutrals: Shades;
+            error: Palette;
+            info: Palette;
         };
         borderRadius: string;
         transitionDuration: number;

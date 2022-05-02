@@ -1,9 +1,15 @@
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React from 'react';
 import { Dimensions, TouchableOpacity } from 'react-native';
+import { useRecoilCallback } from 'recoil';
 import styled, { useTheme } from 'styled-components/native';
-import { Room } from '../../screens/Rooms';
+import { useRoomSubcriptionValue } from '../../hooks/useRoomSubscription';
+import { RoomsStackParamList } from '../../navigation/types';
+import { currentMeasurementState, roomIdState } from '../../state/room';
+import { Notification, NotificationType, Room } from '../../state/types';
 import Card from '../common/Card';
-import { Body1, Body2, Subheading2 } from '../common/Text';
+import { Body1, Body2 } from '../common/Text';
 import { ExclamationIcon, NotificationIcon } from '../icons';
 
 const window = Dimensions.get('window');
@@ -41,25 +47,37 @@ const NotificationContainer = styled.View({
 
 const NotificationText = styled(Body2).attrs({ bold: true })`
     ${(props) => ({
-        color: props.theme.colors.notification,
+        color: props.theme.colors.error.main,
         marginLeft: 4
     })}
 `;
 
 function RoomCard({ item, index }: { item: Room; index: number }) {
     const theme = useTheme();
+    const navigation = useNavigation<NativeStackNavigationProp<RoomsStackParamList, 'Rooms'>>();
+
+    // TODO: Get current notifications for room
+    const notifications: Notification[] = [];
+
+    const roomSubscription = useRoomSubcriptionValue(item.id);
+
+    const goToRoom = useRecoilCallback(({ set, reset }) => async () => {
+        set(roomIdState, item.id);
+        reset(currentMeasurementState);
+        navigation.navigate('Room', { room: item });
+    });
 
     return (
-        <TouchableOpacity onPress={() => alert('Go to room')}>
+        <TouchableOpacity onPress={() => goToRoom()}>
             <Container
                 index={index}
                 backgroundColor={
-                    item.notifications.length > 0 ? theme.colors.background.red : undefined
+                    notifications.length > 0 ? theme.colors.error.background : undefined
                 }
             >
                 <TitleContainer>
-                    <RoomName numberOfLines={1}>{item.name}</RoomName>
-                    {item.notificationsOn && (
+                    <RoomName numberOfLines={1}>{item.roomName}</RoomName>
+                    {roomSubscription && (
                         <NotificationIcon
                             width={14}
                             height={14}
@@ -69,25 +87,27 @@ function RoomCard({ item, index }: { item: Room; index: number }) {
                     )}
                 </TitleContainer>
 
-                <Subheading2 numberOfLines={1}>{item.building}</Subheading2>
+                {/* <Subheading2 numberOfLines={1}>{item.building}</Subheading2> */}
 
                 <NotificationContainer>
-                    {item.notifications.length > 0 && (
+                    {notifications.length > 0 && (
                         <>
                             {/* Show first notification */}
                             <ExclamationIcon
                                 width={14}
                                 height={14}
-                                fill={theme.colors.notification}
+                                fill={theme.colors.error.main}
                             />
                             <NotificationText numberOfLines={1} style={{ flexShrink: 1 }}>
-                                {item.notifications[0]}
+                                {notifications[0].type === NotificationType.OverMaxThreshold
+                                    ? `High ${notifications[0].measurement}`
+                                    : `Low ${notifications[0].measurement}`}
                             </NotificationText>
 
                             {/* Count the rest of the notifications, if any */}
-                            {item.notifications.length > 1 && (
+                            {notifications.length > 1 && (
                                 <NotificationText numberOfLines={1}>
-                                    +{item.notifications.length - 1}
+                                    +{notifications.length - 1}
                                 </NotificationText>
                             )}
                         </>

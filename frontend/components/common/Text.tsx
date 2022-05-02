@@ -5,6 +5,7 @@ const Text = styled.Text<{
     fontSize?: string;
     align?: 'left' | 'center' | 'right';
     bold?: boolean;
+    flexShrink?: boolean;
 }>((props) => ({
     color: props.color ? props.color : props.theme.colors.text.main,
     textAlign: props.align ? props.align : 'left',
@@ -14,6 +15,9 @@ const Text = styled.Text<{
     fontFamily: 'notosans-regular',
     ...(props.bold && {
         fontFamily: 'notosans-medium'
+    }),
+    ...(props.flexShrink && {
+        flexShrink: 1
     })
 }));
 
@@ -61,9 +65,9 @@ export const NavigationLabel = styled(Text)`
     }}
 `;
 
-export const ChartLabel = styled(Text)`
+export const ChartLegend = styled(Text)`
     ${{
-        fontSize: '10px'
+        fontSize: '12px'
     }}
 `;
 

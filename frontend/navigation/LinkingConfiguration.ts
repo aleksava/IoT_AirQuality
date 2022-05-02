@@ -1,9 +1,3 @@
-/**
- * Learn more about deep linking with React Navigation
- * https://reactnavigation.org/docs/deep-linking
- * https://reactnavigation.org/docs/configuring-links
- */
-
 import { LinkingOptions } from '@react-navigation/native';
 import * as Linking from 'expo-linking';
 
@@ -13,23 +7,18 @@ const linking: LinkingOptions<RootStackParamList> = {
     prefixes: [Linking.makeUrl('/')],
     config: {
         screens: {
+            SignIn: 'signin',
             Root: {
                 screens: {
-                    Notifications: {
+                    RoomsStack: {
+                        initialRouteName: 'Rooms',
                         screens: {
-                            NotificationsScreen: 'notifications'
+                            Rooms: 'rooms',
+                            Room: 'room',
+                            AddRoom: 'addrooms'
                         }
                     },
-                    Rooms: {
-                        screens: {
-                            RoomsScreen: 'rooms'
-                        }
-                    },
-                    Settings: {
-                        screens: {
-                            SettingsScreen: 'settings'
-                        }
-                    }
+                    Settings: 'settings'
                 }
             }
         }
